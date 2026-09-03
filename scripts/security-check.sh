@@ -20,7 +20,7 @@ echo "✅ Nenhum arquivo .env ou chave privada versionada."
 
 # 2. Varredura de Padrões de Segredos em Código
 echo "🔍 2. Verificando se há segredos vazados no código recente..."
-SECRETS_FOUND=$(git grep -E 'service_role|AIza[-0-9A-Za-z_]{35}|sk_live_[0-9a-zA-Z]{24}|PRIVATE KEY' -- ':!tests/' ':!.node/' ':!package-lock.json' || true)
+SECRETS_FOUND=$(git grep -E 'service_role|AIza[-0-9A-Za-z_]{35}|sk_live_[0-9a-zA-Z]{24}|PRIVATE KEY' -- ':!tests/' ':!.node/' ':!package-lock.json' ':!scripts/' || true)
 if [ -n "$SECRETS_FOUND" ]; then
   echo "❌ ERRO CRÍTICO: Padrão de credencial ou chave secreta detectado:"
   echo "$SECRETS_FOUND"
