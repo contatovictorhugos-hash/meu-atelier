@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "name": "atelier-agentic-pipeline",
+  "version": "1.0.0",
+  "description": "Pipeline orquestrado da Squad de Agentes de IA do Atelier",
+  "gates": [
+    {
+      "id": "gate-1-po",
+      "name": "Homologação de Requisitos",
+      "agent": "po_requirements_architect",
+      "definitionFile": ".agents/team/po.agent.md",
+      "requiredOutputs": [
+        "specs/{feature}/spec.md",
+        "specs/{feature}/checklists/requirements.md"
+      ]
+    },
+    {
+      "id": "gate-2-dev",
+      "name": "Implementação Funcional",
+      "agent": "dev_fullstack_engineer",
+      "definitionFile": ".agents/team/dev.agent.md",
+      "validationCommands": [
+        "npm run typecheck",
+        "npm run lint",
+        "npm run build"
+      ]
+    },
+    {
+      "id": "gate-3-qa",
+      "name": "Validação de Estabilidade",
+      "agent": "qa_test_specialist",
+      "definitionFile": ".agents/team/qa.agent.md",
+      "validationCommands": [
+        "npm run test"
+      ],
+      "requiredPassRate": 1.0
+    },
+    {
+      "id": "gate-4-si",
+      "name": "Liberação de Segurança & Compliance",
+      "agent": "si_security_gatekeeper",
+      "definitionFile": ".agents/team/si.agent.md",
+      "validationCommands": [
+        "bash scripts/security-check.sh"
+      ],
+      "requiredChecks": [
+        "100_percent_rls",
+        "zero_secrets_leaked",
+        "storage_isolation"
+      ]
+    }
+  ]
+}
