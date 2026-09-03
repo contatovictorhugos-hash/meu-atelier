@@ -14,6 +14,9 @@ interface LegalState {
   activeCourseId: string | 'all';
 
   setActiveCourseId: (id: string | 'all') => void;
+  addCourse: (course: Omit<StudyCourse, 'id'>) => void;
+  updateCourse: (id: string, updates: Partial<Omit<StudyCourse, 'id'>>) => void;
+  deleteCourse: (id: string) => void;
   updateCourseProgress: (courseId: string, progress: number) => void;
   addStudyNote: (note: Omit<StudyNote, 'id' | 'created_at'>) => void;
   deleteStudyNote: (id: string) => void;
@@ -27,6 +30,7 @@ const defaultCourses: StudyCourse[] = [
     id: 'c1',
     name: 'Direito Constitucional',
     professor: 'Dra. Helena Mendes',
+    day_of_week: 1, // Segunda
     color_accent: '#FCE7EC', // Blush
     progress_percentage: 65,
   },
@@ -34,6 +38,7 @@ const defaultCourses: StudyCourse[] = [
     id: 'c2',
     name: 'Direito Civil III (Contratos)',
     professor: 'Dr. Lucas Silveira',
+    day_of_week: 2, // Terça
     color_accent: '#EDE9FE', // Lavender
     progress_percentage: 40,
   },
@@ -41,6 +46,7 @@ const defaultCourses: StudyCourse[] = [
     id: 'c3',
     name: 'Direito Penal (Teoria do Crime)',
     professor: 'Dra. Beatriz Prado',
+    day_of_week: 3, // Quarta
     color_accent: '#FEF9C3', // Butter Yellow
     progress_percentage: 80,
   },
@@ -48,6 +54,7 @@ const defaultCourses: StudyCourse[] = [
     id: 'c4',
     name: 'Direito do Trabalho',
     professor: 'Dr. Fernando Rocha',
+    day_of_week: 5, // Sexta
     color_accent: '#E2E8E2', // Sage Green
     progress_percentage: 30,
   },
@@ -112,10 +119,35 @@ export const useLegalStore = create<LegalState>()(
 
       setActiveCourseId: (id) => set({ activeCourseId: id }),
 
+      addCourse: (course) =>
+        set((state) => ({
+          courses: [
+            ...state.courses,
+            {
+              ...course,
+              id: `c_${Date.now()}`,
+              progress_percentage: course.progress_percentage ?? 0,
+            },
+          ],
+        })),
+
+      updateCourse: (id, updates) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === id ? { ...c, ...updates } : c
+          ),
+        })),
+
+      deleteCourse: (id) =>
+        set((state) => ({
+          courses: state.courses.filter((c) => c.id !== id),
+          activeCourseId: state.activeCourseId === id ? 'all' : state.activeCourseId,
+        })),
+
       updateCourseProgress: (courseId, progress) =>
         set((state) => ({
           courses: state.courses.map((c) =>
-            c.id === courseId ? { ...c, progress_percentage: progress } : c
+            c.id === courseId ? { ...c, progress_percentage: Math.min(Math.max(progress, 0), 100) } : c
           ),
         })),
 

@@ -11,7 +11,7 @@
 
 **Purpose**: Definição canônica de tipos e esquemas de dados compartilhados
 
-- [ ] T001 Extend TypeScript definitions for `StudyCourse` (`day_of_week`, `professor`) and `MealPlanItem` (7-day support) in `src/types/database.types.ts`
+- [X] T001 Extend TypeScript definitions for `StudyCourse` (`day_of_week`, `professor`) and `MealPlanItem` (7-day support) in `src/types/database.types.ts`
 
 ---
 
@@ -19,12 +19,12 @@
 
 **Purpose**: Infraestrutura de estado com persistência local no Zustand que bloqueia as histórias de usuário
 
-- [ ] T002 [P] Implement `addCourse`, `updateCourse`, and `deleteCourse` in `src/stores/useLegalStore.ts`
-- [ ] T003 [P] Implement `saveMeal` and `deleteMeal` in `src/stores/useMealStore.ts`
-- [ ] T004 [P] Implement `addPrepTask` and `deletePrepTask` in `src/stores/useMealStore.ts`
-- [ ] T005 [P] Implement `clearCompletedShoppingItems` in `src/stores/useMealStore.ts`
-- [ ] T006 [P] Add unit tests for LegalStore course CRUD in `tests/unit/test-legal-store.ts`
-- [ ] T007 [P] Add unit tests for MealStore meal, prep and shopping CRUD in `tests/unit/test-meal-store.ts`
+- [X] T002 [P] Implement `addCourse`, `updateCourse`, and `deleteCourse` in `src/stores/useLegalStore.ts`
+- [X] T003 [P] Implement `saveMeal` and `deleteMeal` in `src/stores/useMealStore.ts`
+- [X] T004 [P] Implement `addPrepTask` and `deletePrepTask` in `src/stores/useMealStore.ts`
+- [X] T005 [P] Implement `clearCompletedShoppingItems` in `src/stores/useMealStore.ts`
+- [X] T006 [P] Add unit tests for LegalStore course CRUD in `tests/unit/test-legal-store.ts`
+- [X] T007 [P] Add unit tests for MealStore meal, prep and shopping CRUD in `tests/unit/test-meal-store.ts`
 
 **Checkpoint**: Estado reativo, tipado e com testes unitários pronto. A implementação de UI pode iniciar.
 
@@ -36,9 +36,9 @@
 
 **Independent Test**: Acessar `/legal`, criar a matéria "Direito Civil — Contratos" para Terças-feiras com a Profª Juliana, ajustar o progresso de leitura, editar os dados e excluir uma matéria de teste com persistência após F5.
 
-- [ ] T008 [P] [US1] Create `CourseModal.tsx` in `src/components/modules/legal-binder/CourseModal.tsx` with weekday selector chips, pastel color picker, and validation
-- [ ] T009 [US1] Update `CourseCards.tsx` in `src/components/modules/legal-binder/CourseCards.tsx` with "+ Nova Matéria" trigger, weekday tags, professor name, and edit/delete actions
-- [ ] T010 [US1] Integrate `CourseModal` into `/legal` page orchestration in `src/app/(dashboard)/legal/page.tsx`
+- [X] T008 [P] [US1] Create `CourseModal.tsx` in `src/components/modules/legal-binder/CourseModal.tsx` with weekday selector chips, pastel color picker, and validation
+- [X] T009 [US1] Update `CourseCards.tsx` in `src/components/modules/legal-binder/CourseCards.tsx` with "+ Nova Matéria" trigger, weekday tags, professor name, and edit/delete actions
+- [X] T010 [US1] Integrate `CourseModal` into `/legal` page orchestration in `src/app/(dashboard)/legal/page.tsx`
 
 **Checkpoint**: User Story 1 100% funcional e testável de forma autônoma.
 
@@ -50,8 +50,8 @@
 
 **Independent Test**: Acessar `/bento`, clicar em qualquer dia para planejar almoço ou lanche com foto e ingredientes, salvar e verificar a renderização dinâmica.
 
-- [ ] T011 [P] [US2] Create `MealModal.tsx` in `src/components/modules/meal-planner/MealModal.tsx` with weekday selector, meal type selector, dish title, ingredients input, and `ImageUploadField`
-- [ ] T012 [US2] Refactor `WeeklyMealGrid.tsx` in `src/components/modules/meal-planner/WeeklyMealGrid.tsx` to support 7 days (Seg-Dom), clickable edit/add slots, and visual highlight for today's meal
+- [X] T011 [P] [US2] Create `MealModal.tsx` in `src/components/modules/meal-planner/MealModal.tsx` with weekday selector, meal type selector, dish title, ingredients input, and `ImageUploadField`
+- [X] T012 [US2] Refactor `WeeklyMealGrid.tsx` in `src/components/modules/meal-planner/WeeklyMealGrid.tsx` to support 7 days (Seg-Dom), clickable edit/add slots, and visual highlight for today's meal
 
 **Checkpoint**: User Story 1 e 2 funcionando com independência total.
 
@@ -63,8 +63,8 @@
 
 **Independent Test**: Adicionar e excluir tarefas de pré-cozimento no "Guia de Prep de Domingo", e acionar "Limpar Concluídos" na "Lista de Feira".
 
-- [ ] T013 [P] [US3] Update `SundayPrepGuide.tsx` in `src/components/modules/meal-planner/SundayPrepGuide.tsx` with inline task input, add button, and individual task deletion
-- [ ] T014 [P] [US3] Update `ShoppingList.tsx` in `src/components/modules/meal-planner/ShoppingList.tsx` with "Limpar Concluídos" batch action button
+- [X] T013 [P] [US3] Update `SundayPrepGuide.tsx` in `src/components/modules/meal-planner/SundayPrepGuide.tsx` with inline task input, add button, and individual task deletion
+- [X] T014 [P] [US3] Update `ShoppingList.tsx` in `src/components/modules/meal-planner/ShoppingList.tsx` with "Limpar Concluídos" batch action button
 
 **Checkpoint**: Todas as 3 User Stories entregues e testáveis.
 
@@ -74,9 +74,9 @@
 
 **Purpose**: Verificação de acessibilidade, ergonomia móvel, qualidade e testes globais
 
-- [ ] T015 [P] Verify 44x44pt touch targets, safe areas, and mobile ergonomics across new modals in `src/components/modules/`
-- [ ] T016 Run full test suite `./test-app`, strict typecheck (`npm run typecheck`), and linter (`npm run lint`)
-- [ ] T017 Run quickstart end-to-end validation scenarios per `specs/002-custom-courses-bento/quickstart.md`
+- [X] T015 [P] Verify 44x44pt touch targets, safe areas, and mobile ergonomics across new modals in `src/components/modules/`
+- [X] T016 Run full test suite `./test-app`, strict typecheck (`npm run typecheck`), and linter (`npm run lint`)
+- [X] T017 Run quickstart end-to-end validation scenarios per `specs/002-custom-courses-bento/quickstart.md`
 
 ---
 

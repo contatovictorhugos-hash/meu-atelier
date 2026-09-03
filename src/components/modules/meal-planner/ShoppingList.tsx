@@ -9,11 +9,18 @@ import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils/utils';
 
 export const ShoppingList: React.FC = () => {
-  const { shoppingItems, toggleShoppingItem, addShoppingItem, deleteShoppingItem } =
-    useMealStore();
+  const {
+    shoppingItems,
+    toggleShoppingItem,
+    addShoppingItem,
+    deleteShoppingItem,
+    clearCompletedShoppingItems,
+  } = useMealStore();
 
   const [itemName, setItemName] = useState('');
   const [category, setCategory] = useState<GroceryCategory>('Hortifrúti');
+
+  const completedCount = shoppingItems.filter((i) => i.is_completed).length;
 
   const categories: GroceryCategory[] = [
     'Hortifrúti',
@@ -31,6 +38,25 @@ export const ShoppingList: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Header com Ação em Lote */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-[#4A1525]">Lista de Feira & Mercado 🛒</h3>
+          <p className="text-[11px] text-stone-500">
+            {shoppingItems.length - completedCount} itens pendentes • {completedCount} no carrinho
+          </p>
+        </div>
+        {completedCount > 0 && (
+          <button
+            type="button"
+            onClick={clearCompletedShoppingItems}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold text-pink-700 bg-pink-100/70 hover:bg-pink-200/80 transition-colors min-h-[44px]"
+          >
+            <Trash2 className="w-3 h-3" /> Limpar Concluídos ({completedCount})
+          </button>
+        )}
+      </div>
+
       {/* Add Item Form */}
       <form onSubmit={handleAdd} className="p-3 bg-white rounded-3xl border border-pink-200/70 shadow-sm space-y-2">
         <div className="flex gap-2">

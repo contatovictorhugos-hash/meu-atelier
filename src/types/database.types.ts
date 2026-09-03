@@ -34,11 +34,17 @@ export interface Outfit {
 export interface MealPlanItem {
   id: string;
   user_id?: string;
-  day_of_week: number; // 1 = Seg ... 5 = Sex
+  day_of_week: number; // 1 = Seg ... 7 = Dom
   meal_type: MealType;
   title: string;
   photo_url?: string;
   ingredients: string[];
+}
+
+export interface PrepTask {
+  id: string;
+  task: string;
+  completed: boolean;
 }
 
 export interface ShoppingItem {
@@ -65,6 +71,7 @@ export interface StudyCourse {
   user_id?: string;
   name: string;
   professor?: string;
+  day_of_week?: number; // 1 = Seg ... 6 = Sáb
   color_accent: string;
   progress_percentage: number;
 }
