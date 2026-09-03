@@ -26,6 +26,12 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Defense-in-depth: validate MIME type matches image
+    if (!file.type.startsWith('image/')) {
+      console.warn('Arquivo ignorado: apenas imagens são suportadas.');
+      return;
+    }
+
     try {
       setIsCompressing(true);
       const compressedBlob = await compressImageToWebp(file);
@@ -37,9 +43,10 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       };
       reader.readAsDataURL(compressedBlob);
     } catch (err) {
-      console.error('Erro na compressão:', err);
+      console.error('Erro na compressão de imagem:', err);
     } finally {
       setIsCompressing(false);
+      e.target.value = '';
     }
   };
 
@@ -96,7 +103,11 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       </div>
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val.trim().toLowerCase().startsWith('javascript:')) return;
+          onChange(val);
+        }}
         placeholder={placeholderLink}
       />
     </div>
