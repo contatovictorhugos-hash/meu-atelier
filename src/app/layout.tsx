@@ -38,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="bg-[#FDF2F4]">
-      <body className="min-h-screen bg-[#FDF2F4] text-[#1E1B1E] antialiased selection:bg-pink-200">
+    <html lang="pt-BR" className="bg-[#FDF2F4]" suppressHydrationWarning>
+      <body className="min-h-screen bg-[#FDF2F4] text-[#1E1B1E] antialiased selection:bg-pink-200" suppressHydrationWarning>
         <main className="max-w-md mx-auto min-h-screen bg-[#FDF2F4] relative flex flex-col shadow-2xl overflow-x-hidden">
           {children}
         </main>
