@@ -39,8 +39,13 @@ export const AddWardrobeItemModal: React.FC<AddWardrobeItemModalProps> = ({
     try {
       setIsCompressing(true);
       const compressedBlob = await compressImageToWebp(file);
-      const localPreview = URL.createObjectURL(compressedBlob);
-      setImageUrl(localPreview);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImageUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(compressedBlob);
     } catch (err) {
       console.error('Erro na compressão:', err);
     } finally {

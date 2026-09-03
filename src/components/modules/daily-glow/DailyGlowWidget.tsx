@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDailyGlowStore } from '@/stores/useDailyGlowStore';
 import { PolaroidFrame } from '@/components/layout/PolaroidFrame';
 import { HydrationTracker } from './HydrationTracker';
@@ -11,24 +11,38 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
 export const DailyGlowWidget: React.FC = () => {
-  const { dailyPhotoUrl, dailyQuote, setDailyPhotoUrl, setDailyQuote } =
-    useDailyGlowStore();
+  const {
+    dailyPhotoUrl,
+    dailyQuote,
+    setDailyPhotoUrl,
+    setDailyQuote,
+    resetDailyIfNewDay,
+  } = useDailyGlowStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [photoInput, setPhotoInput] = useState('');
   const [quoteInput, setQuoteInput] = useState('');
+  const [mountedDate, setMountedDate] = useState('');
+  const [shortDate, setShortDate] = useState('');
+
+  useEffect(() => {
+    resetDailyIfNewDay();
+    const now = new Date();
+    setMountedDate(
+      now.toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      })
+    );
+    setShortDate(now.toLocaleDateString('pt-BR'));
+  }, [resetDailyIfNewDay]);
 
   const handleSaveHighlights = () => {
     if (photoInput.trim()) setDailyPhotoUrl(photoInput.trim());
     if (quoteInput.trim()) setDailyQuote(quoteInput.trim());
     setIsModalOpen(false);
   };
-
-  const todayFormatted = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
 
   return (
     <div className="space-y-4">
@@ -39,7 +53,7 @@ export const DailyGlowWidget: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5" /> Meu Santuário Pessoal
           </span>
           <h1 className="text-2xl font-bold text-[#4A1525] capitalize">
-            {todayFormatted}
+            {mountedDate || 'Hoje'}
           </h1>
         </div>
         <button
@@ -59,7 +73,7 @@ export const DailyGlowWidget: React.FC = () => {
       <PolaroidFrame
         imageUrl={dailyPhotoUrl}
         caption="Mood do Dia ✨"
-        date={new Date().toLocaleDateString('pt-BR')}
+        date={shortDate || undefined}
         onClick={() => {
           setPhotoInput(dailyPhotoUrl);
           setQuoteInput(dailyQuote);
