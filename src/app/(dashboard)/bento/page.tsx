@@ -29,7 +29,7 @@ export default function BentoPage() {
               : 'text-stone-600 hover:text-stone-900'
           }`}
         >
-          Semana (Seg-Sex)
+          Cardápio da Semana
         </button>
         <button
           onClick={() => setActiveTab('prep')}

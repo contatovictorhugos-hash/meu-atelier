@@ -80,4 +80,20 @@ describe('Unit Tests: ClosetStore (Wardrobe, Outfits & OOTD)', () => {
     const updatedOutfit = useClosetStore.getState().outfits.find((o) => o.id === outfitId);
     assert.equal(updatedOutfit?.photo_url, 'https://example.com/selfie.jpg');
   });
+
+  test('deletes an outfit by id', () => {
+    const store = useClosetStore.getState();
+    store.saveOutfit({
+      title: 'Look Deletar',
+      occasion: 'Casual',
+      items: [],
+    });
+
+    const outfitId = useClosetStore.getState().outfits[0].id;
+    assert.ok(outfitId);
+
+    store.deleteOutfit(outfitId);
+    const remaining = useClosetStore.getState().outfits.find((o) => o.id === outfitId);
+    assert.equal(remaining, undefined);
+  });
 });

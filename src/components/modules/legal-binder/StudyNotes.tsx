@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { ImageUploadField } from '@/components/ui/ImageUploadField';
 import { Plus, Sparkles, Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/utils';
 
@@ -159,16 +160,13 @@ export const StudyNotes: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
-              URL da Foto do Vade Mecum / Slide (Opcional)
-            </label>
-            <Input
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
-              placeholder="https://exemplo.com/foto-pagina.jpg"
-            />
-          </div>
+          <ImageUploadField
+            label="Foto do Vade Mecum / Slide (Opcional)"
+            value={photoUrl}
+            onChange={setPhotoUrl}
+            placeholderLink="https://exemplo.com/foto-pagina.jpg"
+            description="Foto da página de lei ou anotação"
+          />
 
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">

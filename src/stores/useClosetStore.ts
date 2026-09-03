@@ -12,6 +12,7 @@ interface ClosetState {
   deleteWardrobeItem: (id: string) => void;
   saveOutfit: (outfit: Omit<Outfit, 'id' | 'created_at'>) => void;
   attachSelfieToOutfit: (outfitId: string, selfieUrl: string) => void;
+  deleteOutfit: (id: string) => void;
 }
 
 const defaultWardrobe: WardrobeItem[] = [
@@ -103,6 +104,11 @@ export const useClosetStore = create<ClosetState>()(
           outfits: state.outfits.map((o) =>
             o.id === outfitId ? { ...o, photo_url: selfieUrl } : o
           ),
+        })),
+
+      deleteOutfit: (id) =>
+        set((state) => ({
+          outfits: state.outfits.filter((o) => o.id !== id),
         })),
     }),
     {

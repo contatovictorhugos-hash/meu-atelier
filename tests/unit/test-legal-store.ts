@@ -82,4 +82,49 @@ describe('Unit Tests: LegalStore (Law Courses, Fichamentos & Deadlines)', () => 
     const remaining = useLegalStore.getState().deadlines;
     assert.equal(remaining.length, 0);
   });
+
+  test('adds a new study course with professor and day of week', () => {
+    const store = useLegalStore.getState();
+    store.addCourse({
+      name: 'Direito Processual Civil',
+      professor: 'Prof. Dr. Ricardo',
+      day_of_week: 4,
+      color_accent: '#FDF2F4',
+      progress_percentage: 10,
+    });
+
+    const courses = useLegalStore.getState().courses;
+    assert.equal(courses.length, 3);
+    const created = courses.find((c) => c.name === 'Direito Processual Civil');
+    assert.ok(created);
+    assert.equal(created.professor, 'Prof. Dr. Ricardo');
+    assert.equal(created.day_of_week, 4);
+    assert.match(created.id, /^c_/);
+  });
+
+  test('updates an existing course details', () => {
+    const store = useLegalStore.getState();
+    store.updateCourse('c1', {
+      name: 'Direito Constitucional Avançado',
+      professor: 'Prof. Titular Helena',
+      day_of_week: 2,
+    });
+
+    const updated = useLegalStore.getState().courses.find((c) => c.id === 'c1');
+    assert.equal(updated?.name, 'Direito Constitucional Avançado');
+    assert.equal(updated?.professor, 'Prof. Titular Helena');
+    assert.equal(updated?.day_of_week, 2);
+  });
+
+  test('deletes a course by id and resets activeCourseId if matching', () => {
+    const store = useLegalStore.getState();
+    store.setActiveCourseId('c2');
+    assert.equal(useLegalStore.getState().activeCourseId, 'c2');
+
+    store.deleteCourse('c2');
+    const remaining = useLegalStore.getState().courses;
+    assert.equal(remaining.length, 1);
+    assert.equal(remaining.find((c) => c.id === 'c2'), undefined);
+    assert.equal(useLegalStore.getState().activeCourseId, 'all');
+  });
 });

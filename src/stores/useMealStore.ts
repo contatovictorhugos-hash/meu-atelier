@@ -13,10 +13,15 @@ interface MealState {
   sundayPrepTasks: PrepTask[];
   shoppingItems: ShoppingItem[];
 
+  saveMeal: (meal: Omit<MealPlanItem, 'id'> & { id?: string }) => void;
+  deleteMeal: (id: string) => void;
   togglePrepTask: (id: string) => void;
+  addPrepTask: (task: string) => void;
+  deletePrepTask: (id: string) => void;
   toggleShoppingItem: (id: string) => void;
   addShoppingItem: (name: string, category: GroceryCategory) => void;
   deleteShoppingItem: (id: string) => void;
+  clearCompletedShoppingItems: () => void;
 }
 
 const defaultWeeklyMeals: MealPlanItem[] = [
@@ -65,6 +70,24 @@ const defaultWeeklyMeals: MealPlanItem[] = [
       'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=400&auto=format&fit=crop',
     ingredients: ['Atum', 'Pão folha', 'Rúcula', 'Tomatinho cereja'],
   },
+  {
+    id: 'm6',
+    day_of_week: 6, // Sábado
+    meal_type: 'Almoço',
+    title: 'Bowl Mediterrâneo com Falafel e Homus',
+    photo_url:
+      'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=400&auto=format&fit=crop',
+    ingredients: ['Falafel', 'Homus', 'Pepino', 'Tomate'],
+  },
+  {
+    id: 'm7',
+    day_of_week: 7, // Domingo
+    meal_type: 'Almoço',
+    title: 'Nhoque Artesanal ao Molho Sugo e Manjericão',
+    photo_url:
+      'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=400&auto=format&fit=crop',
+    ingredients: ['Nhoque', 'Molho de tomate caseiro', 'Parmesão', 'Manjericão'],
+  },
 ];
 
 const defaultPrepTasks: PrepTask[] = [
@@ -76,13 +99,12 @@ const defaultPrepTasks: PrepTask[] = [
 ];
 
 const defaultShoppingItems: ShoppingItem[] = [
-  { id: 's1', item_name: 'Abobrinha italiana', category: 'Hortifrúti', is_completed: false },
-  { id: 's2', item_name: 'Cenouras orgânicas', category: 'Hortifrúti', is_completed: false },
-  { id: 's3', item_name: 'Rúcula e folhas', category: 'Hortifrúti', is_completed: true },
-  { id: 's4', item_name: 'Peito de frango (1kg)', category: 'Geladeira', is_completed: false },
-  { id: 's5', item_name: 'Iogurte natural', category: 'Geladeira', is_completed: false },
-  { id: 's6', item_name: 'Quinoa real em grãos', category: 'Despensa', is_completed: true },
-  { id: 's7', item_name: 'Azeite de oliva extra-virgem', category: 'Despensa', is_completed: false },
+  { id: 's1', item_name: 'Peito de Frango (1kg)', category: 'Geladeira', is_completed: false },
+  { id: 's2', item_name: 'Quinoa Real e Arroz Integral', category: 'Despensa', is_completed: false },
+  { id: 's3', item_name: 'Abobrinha e Cenoura Orgânica', category: 'Hortifrúti', is_completed: true },
+  { id: 's4', item_name: 'Filé de Salmão Fresco', category: 'Geladeira', is_completed: false },
+  { id: 's5', item_name: 'Folhas de Rúcula e Espinafre', category: 'Hortifrúti', is_completed: true },
+  { id: 's6', item_name: 'Azeite de Oliva Extra Virgem', category: 'Despensa', is_completed: false },
 ];
 
 export const useMealStore = create<MealState>()(
@@ -92,11 +114,56 @@ export const useMealStore = create<MealState>()(
       sundayPrepTasks: defaultPrepTasks,
       shoppingItems: defaultShoppingItems,
 
+      saveMeal: (mealData) =>
+        set((state) => {
+          const existingIdx = state.weeklyMeals.findIndex(
+            (m) =>
+              (mealData.id && m.id === mealData.id) ||
+              (m.day_of_week === mealData.day_of_week && m.meal_type === mealData.meal_type)
+          );
+          if (existingIdx >= 0) {
+            const updated = [...state.weeklyMeals];
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              ...mealData,
+              id: updated[existingIdx].id,
+            };
+            return { weeklyMeals: updated };
+          }
+          return {
+            weeklyMeals: [
+              ...state.weeklyMeals,
+              {
+                ...mealData,
+                id: mealData.id || `m_${Date.now()}`,
+              },
+            ],
+          };
+        }),
+
+      deleteMeal: (id) =>
+        set((state) => ({
+          weeklyMeals: state.weeklyMeals.filter((m) => m.id !== id),
+        })),
+
       togglePrepTask: (id) =>
         set((state) => ({
           sundayPrepTasks: state.sundayPrepTasks.map((t) =>
             t.id === id ? { ...t, completed: !t.completed } : t
           ),
+        })),
+
+      addPrepTask: (task) =>
+        set((state) => ({
+          sundayPrepTasks: [
+            ...state.sundayPrepTasks,
+            { id: `pt_${Date.now()}`, task: task.trim(), completed: false },
+          ],
+        })),
+
+      deletePrepTask: (id) =>
+        set((state) => ({
+          sundayPrepTasks: state.sundayPrepTasks.filter((t) => t.id !== id),
         })),
 
       toggleShoppingItem: (id) =>
@@ -117,6 +184,11 @@ export const useMealStore = create<MealState>()(
       deleteShoppingItem: (id) =>
         set((state) => ({
           shoppingItems: state.shoppingItems.filter((item) => item.id !== id),
+        })),
+
+      clearCompletedShoppingItems: () =>
+        set((state) => ({
+          shoppingItems: state.shoppingItems.filter((item) => !item.is_completed),
         })),
     }),
     {
