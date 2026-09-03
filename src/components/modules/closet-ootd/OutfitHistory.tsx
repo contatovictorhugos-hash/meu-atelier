@@ -42,6 +42,18 @@ export const OutfitHistory: React.FC = () => {
         </span>
       </div>
 
+      {outfits.length === 0 && (
+        <div className="text-center py-12 px-4 bg-white/70 rounded-3xl border border-dashed border-pink-200 space-y-2">
+          <span className="text-3xl block mb-1">📸</span>
+          <h3 className="text-sm font-semibold text-[#4A1525]">
+            Nenhum look no histórico ainda
+          </h3>
+          <p className="text-xs text-stone-500 max-w-xs mx-auto">
+            Crie combinações no Look Builder e registre suas selfies OOTD para acompanhar seu histórico de estilo.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-4">
         {outfits.map((outfit) => (
           <div

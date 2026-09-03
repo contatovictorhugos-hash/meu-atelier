@@ -89,6 +89,13 @@ export const ShoppingList: React.FC = () => {
         </div>
       </form>
 
+      {/* Empty State */}
+      {shoppingItems.length === 0 && (
+        <div className="p-8 text-center bg-[#FCFBF7] rounded-3xl border border-dashed border-pink-200 text-stone-500 text-xs">
+          Sua lista de compras está vazia! 🛒 Adicione ingredientes e itens para sua próxima ida à feira ou mercado.
+        </div>
+      )}
+
       {/* Sections */}
       <div className="space-y-3">
         {categories.map((cat) => {
