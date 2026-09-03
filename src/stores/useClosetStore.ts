@@ -1,11 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { WardrobeItem, Outfit, WardrobeCategory, OccasionTag } from '../types/database.types.ts';
+import {
+  fetchUserWardrobe,
+  insertUserWardrobe,
+  deleteUserWardrobe,
+  fetchUserOutfits,
+  insertUserOutfit,
+  deleteUserOutfit,
+} from '../lib/supabase/sync.ts';
 
 interface ClosetState {
   wardrobeItems: WardrobeItem[];
   outfits: Outfit[];
   selectedCategory: WardrobeCategory | 'all';
+  isLoading: boolean;
 
   setSelectedCategory: (category: WardrobeCategory | 'all') => void;
   addWardrobeItem: (item: Omit<WardrobeItem, 'id'>) => void;
@@ -13,6 +22,7 @@ interface ClosetState {
   saveOutfit: (outfit: Omit<Outfit, 'id' | 'created_at'>) => void;
   attachSelfieToOutfit: (outfitId: string, selfieUrl: string) => void;
   deleteOutfit: (id: string) => void;
+  fetchCloset: () => Promise<void>;
 }
 
 const defaultWardrobe: WardrobeItem[] = [
@@ -71,33 +81,81 @@ export const useClosetStore = create<ClosetState>()(
       wardrobeItems: defaultWardrobe,
       outfits: defaultOutfits,
       selectedCategory: 'all',
+      isLoading: false,
 
       setSelectedCategory: (category) => set({ selectedCategory: category }),
 
-      addWardrobeItem: (item) =>
-        set((state) => ({
-          wardrobeItems: [
-            { ...item, id: `w_${Date.now()}` },
-            ...state.wardrobeItems,
-          ],
-        })),
+      fetchCloset: async () => {
+        set({ isLoading: true });
+        try {
+          const [cloudItems, cloudOutfits] = await Promise.all([
+            fetchUserWardrobe(),
+            fetchUserOutfits(),
+          ]);
 
-      deleteWardrobeItem: (id) =>
+          if (cloudItems !== null) {
+            set({ wardrobeItems: cloudItems });
+          }
+          if (cloudOutfits !== null) {
+            set({ outfits: cloudOutfits });
+          }
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      addWardrobeItem: (item) => {
+        const tempId = `w_${Date.now()}`;
+        set((state) => ({
+          wardrobeItems: [{ ...item, id: tempId }, ...state.wardrobeItems],
+        }));
+
+        insertUserWardrobe(item)
+          .then((realId) => {
+            if (realId) {
+              set((state) => ({
+                wardrobeItems: state.wardrobeItems.map((w) =>
+                  w.id === tempId ? { ...w, id: realId } : w
+                ),
+              }));
+            }
+          })
+          .catch(() => {});
+      },
+
+      deleteWardrobeItem: (id) => {
         set((state) => ({
           wardrobeItems: state.wardrobeItems.filter((item) => item.id !== id),
-        })),
+        }));
+        deleteUserWardrobe(id).catch(() => {});
+      },
 
-      saveOutfit: (outfitData) =>
+      saveOutfit: (outfitData) => {
+        const tempId = `o_${Date.now()}`;
+        const createdAt = new Date().toISOString().split('T')[0];
         set((state) => ({
           outfits: [
             {
               ...outfitData,
-              id: `o_${Date.now()}`,
-              created_at: new Date().toISOString().split('T')[0],
+              id: tempId,
+              created_at: createdAt,
             },
             ...state.outfits,
           ],
-        })),
+        }));
+
+        insertUserOutfit(outfitData)
+          .then((realId) => {
+            if (realId) {
+              set((state) => ({
+                outfits: state.outfits.map((o) =>
+                  o.id === tempId ? { ...o, id: realId } : o
+                ),
+              }));
+            }
+          })
+          .catch(() => {});
+      },
 
       attachSelfieToOutfit: (outfitId, selfieUrl) =>
         set((state) => ({
@@ -106,10 +164,12 @@ export const useClosetStore = create<ClosetState>()(
           ),
         })),
 
-      deleteOutfit: (id) =>
+      deleteOutfit: (id) => {
         set((state) => ({
           outfits: state.outfits.filter((o) => o.id !== id),
-        })),
+        }));
+        deleteUserOutfit(id).catch(() => {});
+      },
     }),
     {
       name: 'atelier-closet-storage',

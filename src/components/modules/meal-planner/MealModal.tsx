@@ -193,6 +193,7 @@ export const MealModal: React.FC<MealModalProps> = ({
             value={photoUrl}
             onChange={setPhotoUrl}
             label="Foto da Marmita ou Inspiração"
+            folder="meals"
           />
         </div>
 

@@ -32,3 +32,5 @@ out/
 !.vscode/extensions.json
 .idea/
 *.tsbuildinfo
+.vercel
+.env*

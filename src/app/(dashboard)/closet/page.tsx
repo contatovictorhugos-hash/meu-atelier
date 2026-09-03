@@ -1,16 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WardrobeGrid } from '@/components/modules/closet-ootd/WardrobeGrid';
 import { LookBuilder } from '@/components/modules/closet-ootd/LookBuilder';
 import { OutfitHistory } from '@/components/modules/closet-ootd/OutfitHistory';
 import { AddWardrobeItemModal } from '@/components/modules/closet-ootd/AddWardrobeItemModal';
 import { Button } from '@/components/ui/Button';
+import { useClosetStore } from '@/stores/useClosetStore';
 import { Plus, Sparkles } from 'lucide-react';
 
 export default function ClosetPage() {
+  const { fetchCloset } = useClosetStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [viewTab, setViewTab] = useState<'builder' | 'wardrobe' | 'history'>('builder');
+
+  useEffect(() => {
+    fetchCloset();
+  }, [fetchCloset]);
 
   return (
     <div className="space-y-4">

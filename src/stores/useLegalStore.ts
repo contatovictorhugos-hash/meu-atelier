@@ -6,13 +6,28 @@ import type {
   StudyDeadline,
   DeadlineStatus,
 } from '../types/database.types.ts';
+import {
+  fetchUserCourses,
+  insertUserCourse,
+  updateUserCourse,
+  deleteUserCourse,
+  fetchUserNotes,
+  insertUserNote,
+  deleteUserNote,
+  fetchUserDeadlines,
+  insertUserDeadline,
+  updateUserDeadlineStatus,
+  deleteUserDeadline,
+} from '../lib/supabase/sync.ts';
 
 interface LegalState {
   courses: StudyCourse[];
   notes: StudyNote[];
   deadlines: StudyDeadline[];
   activeCourseId: string | 'all';
+  isLoading: boolean;
 
+  fetchLegal: () => Promise<void>;
   setActiveCourseId: (id: string | 'all') => void;
   addCourse: (course: Omit<StudyCourse, 'id'>) => void;
   updateCourse: (id: string, updates: Partial<Omit<StudyCourse, 'id'>>) => void;
@@ -116,77 +131,151 @@ export const useLegalStore = create<LegalState>()(
       notes: defaultNotes,
       deadlines: defaultDeadlines,
       activeCourseId: 'all',
+      isLoading: false,
+
+      fetchLegal: async () => {
+        set({ isLoading: true });
+        try {
+          const [cloudCourses, cloudNotes, cloudDeadlines] = await Promise.all([
+            fetchUserCourses(),
+            fetchUserNotes(),
+            fetchUserDeadlines(),
+          ]);
+
+          if (cloudCourses !== null) {
+            set({ courses: cloudCourses });
+          }
+          if (cloudNotes !== null) {
+            set({ notes: cloudNotes });
+          }
+          if (cloudDeadlines !== null) {
+            set({ deadlines: cloudDeadlines });
+          }
+        } finally {
+          set({ isLoading: false });
+        }
+      },
 
       setActiveCourseId: (id) => set({ activeCourseId: id }),
 
-      addCourse: (course) =>
+      addCourse: (course) => {
+        const tempId = `c_${Date.now()}`;
         set((state) => ({
           courses: [
             ...state.courses,
             {
               ...course,
-              id: `c_${Date.now()}`,
+              id: tempId,
               progress_percentage: course.progress_percentage ?? 0,
             },
           ],
-        })),
+        }));
 
-      updateCourse: (id, updates) =>
+        insertUserCourse(course).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              courses: state.courses.map((c) =>
+                c.id === tempId ? { ...c, id: realId } : c
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
+
+      updateCourse: (id, updates) => {
         set((state) => ({
           courses: state.courses.map((c) =>
             c.id === id ? { ...c, ...updates } : c
           ),
-        })),
+        }));
+        updateUserCourse(id, updates).catch(() => {});
+      },
 
-      deleteCourse: (id) =>
+      deleteCourse: (id) => {
         set((state) => ({
           courses: state.courses.filter((c) => c.id !== id),
           activeCourseId: state.activeCourseId === id ? 'all' : state.activeCourseId,
-        })),
+        }));
+        deleteUserCourse(id).catch(() => {});
+      },
 
-      updateCourseProgress: (courseId, progress) =>
+      updateCourseProgress: (courseId, progress) => {
+        const boundedProgress = Math.min(Math.max(progress, 0), 100);
         set((state) => ({
           courses: state.courses.map((c) =>
-            c.id === courseId ? { ...c, progress_percentage: Math.min(Math.max(progress, 0), 100) } : c
+            c.id === courseId ? { ...c, progress_percentage: boundedProgress } : c
           ),
-        })),
+        }));
+        updateUserCourse(courseId, { progress_percentage: boundedProgress }).catch(() => {});
+      },
 
-      addStudyNote: (note) =>
+      addStudyNote: (note) => {
+        const tempId = `n_${Date.now()}`;
+        const createdAt = new Date().toISOString().split('T')[0];
         set((state) => ({
           notes: [
             {
               ...note,
-              id: `n_${Date.now()}`,
-              created_at: new Date().toISOString().split('T')[0],
+              id: tempId,
+              created_at: createdAt,
             },
             ...state.notes,
           ],
-        })),
+        }));
 
-      deleteStudyNote: (id) =>
+        insertUserNote(note).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              notes: state.notes.map((n) =>
+                n.id === tempId ? { ...n, id: realId } : n
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
+
+      deleteStudyNote: (id) => {
         set((state) => ({
           notes: state.notes.filter((n) => n.id !== id),
-        })),
+        }));
+        deleteUserNote(id).catch(() => {});
+      },
 
-      addDeadline: (deadline) =>
+      addDeadline: (deadline) => {
+        const tempId = `d_${Date.now()}`;
         set((state) => ({
           deadlines: [
             ...state.deadlines,
-            { ...deadline, id: `d_${Date.now()}` },
+            { ...deadline, id: tempId },
           ],
-        })),
+        }));
 
-      updateDeadlineStatus: (id, status) =>
+        insertUserDeadline(deadline).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              deadlines: state.deadlines.map((d) =>
+                d.id === tempId ? { ...d, id: realId } : d
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
+
+      updateDeadlineStatus: (id, status) => {
         set((state) => ({
           deadlines: state.deadlines.map((d) =>
             d.id === id ? { ...d, status } : d
           ),
-        })),
+        }));
+        updateUserDeadlineStatus(id, status).catch(() => {});
+      },
 
-      deleteDeadline: (id) =>
+      deleteDeadline: (id) => {
         set((state) => ({
           deadlines: state.deadlines.filter((d) => d.id !== id),
-        })),
+        }));
+        deleteUserDeadline(id).catch(() => {});
+      },
     }),
     {
       name: 'atelier-legal-storage',

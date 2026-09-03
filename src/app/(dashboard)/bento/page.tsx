@@ -1,13 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeeklyMealGrid } from '@/components/modules/meal-planner/WeeklyMealGrid';
 import { SundayPrepGuide } from '@/components/modules/meal-planner/SundayPrepGuide';
 import { ShoppingList } from '@/components/modules/meal-planner/ShoppingList';
+import { useMealStore } from '@/stores/useMealStore';
 import { Sparkles } from 'lucide-react';
 
 export default function BentoPage() {
+  const { fetchMeals } = useMealStore();
   const [activeTab, setActiveTab] = useState<'meals' | 'prep' | 'shopping'>('meals');
+
+  useEffect(() => {
+    fetchMeals();
+  }, [fetchMeals]);
 
   return (
     <div className="space-y-4">

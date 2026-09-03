@@ -1,6 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { MealPlanItem, ShoppingItem, GroceryCategory } from '../types/database.types.ts';
+import {
+  fetchUserMeals,
+  saveUserMeal,
+  deleteUserMeal,
+  fetchUserPrepTasks,
+  insertUserPrepTask,
+  toggleUserPrepTask,
+  deleteUserPrepTask,
+  fetchUserShoppingItems,
+  insertUserShoppingItem,
+  toggleUserShoppingItem,
+  deleteUserShoppingItem,
+  clearCompletedUserShoppingItems,
+} from '../lib/supabase/sync.ts';
 
 export interface PrepTask {
   id: string;
@@ -12,7 +26,9 @@ interface MealState {
   weeklyMeals: MealPlanItem[];
   sundayPrepTasks: PrepTask[];
   shoppingItems: ShoppingItem[];
+  isLoading: boolean;
 
+  fetchMeals: () => Promise<void>;
   saveMeal: (meal: Omit<MealPlanItem, 'id'> & { id?: string }) => void;
   deleteMeal: (id: string) => void;
   togglePrepTask: (id: string) => void;
@@ -113,8 +129,33 @@ export const useMealStore = create<MealState>()(
       weeklyMeals: defaultWeeklyMeals,
       sundayPrepTasks: defaultPrepTasks,
       shoppingItems: defaultShoppingItems,
+      isLoading: false,
 
-      saveMeal: (mealData) =>
+      fetchMeals: async () => {
+        set({ isLoading: true });
+        try {
+          const [cloudMeals, cloudPrep, cloudShopping] = await Promise.all([
+            fetchUserMeals(),
+            fetchUserPrepTasks(),
+            fetchUserShoppingItems(),
+          ]);
+
+          if (cloudMeals !== null) {
+            set({ weeklyMeals: cloudMeals });
+          }
+          if (cloudPrep !== null) {
+            set({ sundayPrepTasks: cloudPrep });
+          }
+          if (cloudShopping !== null) {
+            set({ shoppingItems: cloudShopping });
+          }
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      saveMeal: (mealData) => {
+        const tempId = mealData.id || `m_${Date.now()}`;
         set((state) => {
           const existingIdx = state.weeklyMeals.findIndex(
             (m) =>
@@ -135,61 +176,118 @@ export const useMealStore = create<MealState>()(
               ...state.weeklyMeals,
               {
                 ...mealData,
-                id: mealData.id || `m_${Date.now()}`,
+                id: tempId,
               },
             ],
           };
-        }),
+        });
 
-      deleteMeal: (id) =>
+        saveUserMeal({ ...mealData, id: tempId }).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              weeklyMeals: state.weeklyMeals.map((m) =>
+                m.id === tempId ? { ...m, id: realId } : m
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
+
+      deleteMeal: (id) => {
         set((state) => ({
           weeklyMeals: state.weeklyMeals.filter((m) => m.id !== id),
-        })),
+        }));
+        deleteUserMeal(id).catch(() => {});
+      },
 
-      togglePrepTask: (id) =>
-        set((state) => ({
-          sundayPrepTasks: state.sundayPrepTasks.map((t) =>
-            t.id === id ? { ...t, completed: !t.completed } : t
-          ),
-        })),
+      togglePrepTask: (id) => {
+        set((state) => {
+          let updatedCompleted = false;
+          const nextTasks = state.sundayPrepTasks.map((t) => {
+            if (t.id === id) {
+              updatedCompleted = !t.completed;
+              return { ...t, completed: updatedCompleted };
+            }
+            return t;
+          });
+          toggleUserPrepTask(id, updatedCompleted).catch(() => {});
+          return { sundayPrepTasks: nextTasks };
+        });
+      },
 
-      addPrepTask: (task) =>
+      addPrepTask: (task) => {
+        const tempId = `pt_${Date.now()}`;
         set((state) => ({
           sundayPrepTasks: [
             ...state.sundayPrepTasks,
-            { id: `pt_${Date.now()}`, task: task.trim(), completed: false },
+            { id: tempId, task: task.trim(), completed: false },
           ],
-        })),
+        }));
+        insertUserPrepTask(task.trim()).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              sundayPrepTasks: state.sundayPrepTasks.map((t) =>
+                t.id === tempId ? { ...t, id: realId } : t
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
 
-      deletePrepTask: (id) =>
+      deletePrepTask: (id) => {
         set((state) => ({
           sundayPrepTasks: state.sundayPrepTasks.filter((t) => t.id !== id),
-        })),
+        }));
+        deleteUserPrepTask(id).catch(() => {});
+      },
 
-      toggleShoppingItem: (id) =>
-        set((state) => ({
-          shoppingItems: state.shoppingItems.map((item) =>
-            item.id === id ? { ...item, is_completed: !item.is_completed } : item
-          ),
-        })),
+      toggleShoppingItem: (id) => {
+        set((state) => {
+          let updatedCompleted = false;
+          const nextItems = state.shoppingItems.map((item) => {
+            if (item.id === id) {
+              updatedCompleted = !item.is_completed;
+              return { ...item, is_completed: updatedCompleted };
+            }
+            return item;
+          });
+          toggleUserShoppingItem(id, updatedCompleted).catch(() => {});
+          return { shoppingItems: nextItems };
+        });
+      },
 
-      addShoppingItem: (name, category) =>
+      addShoppingItem: (name, category) => {
+        const tempId = `s_${Date.now()}`;
         set((state) => ({
           shoppingItems: [
             ...state.shoppingItems,
-            { id: `s_${Date.now()}`, item_name: name, category, is_completed: false },
+            { id: tempId, item_name: name, category, is_completed: false },
           ],
-        })),
+        }));
+        insertUserShoppingItem(name, category).then((realId) => {
+          if (realId) {
+            set((state) => ({
+              shoppingItems: state.shoppingItems.map((item) =>
+                item.id === tempId ? { ...item, id: realId } : item
+              ),
+            }));
+          }
+        }).catch(() => {});
+      },
 
-      deleteShoppingItem: (id) =>
+      deleteShoppingItem: (id) => {
         set((state) => ({
           shoppingItems: state.shoppingItems.filter((item) => item.id !== id),
-        })),
+        }));
+        deleteUserShoppingItem(id).catch(() => {});
+      },
 
-      clearCompletedShoppingItems: () =>
+      clearCompletedShoppingItems: () => {
         set((state) => ({
           shoppingItems: state.shoppingItems.filter((item) => !item.is_completed),
-        })),
+        }));
+        clearCompletedUserShoppingItems().catch(() => {});
+      },
     }),
     {
       name: 'atelier-meal-storage',
