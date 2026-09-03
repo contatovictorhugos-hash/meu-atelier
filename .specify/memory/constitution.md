@@ -1,15 +1,10 @@
 <!--
 Sync Impact Report:
-- Version Change: 0.0.0 (Template Scaffold) → 1.0.0
+- Version Change: 1.0.0 → 1.1.0
 - Modified Principles:
-  - [PRINCIPLE_1_NAME] → I. Dopamina Estética & Santuário Visual (Digital Scrapbook / Y2K Clean)
-  - [PRINCIPLE_2_NAME] → II. Ergonomia Móvel & Micro-Interações Táteis (Thumb-Zone & 60 FPS)
-  - [PRINCIPLE_3_NAME] → III. Arquitetura Modular & Orientada a Configuração (Config-Driven)
-  - [PRINCIPLE_4_NAME] → IV. Tipagem Estrita & Otimização Rigorosa de Mídia (NON-NEGOTIABLE)
-  - [PRINCIPLE_5_NAME] → V. Privacidade do Santuário Pessoal & Resiliência Offline
+  - [NOVA ADIÇÃO] → VI. Custo Financeiro Zero & Uso Exclusivo de Recursos Gratuitos / Bônus Pré-existentes (NON-NEGOTIABLE)
 - Added Sections:
-  - Padrões Técnicos & Restrições Estéticas (substituindo [SECTION_2_NAME])
-  - Fluxo de Desenvolvimento & Quality Gates (substituindo [SECTION_3_NAME])
+  - Atualização dos Padrões Técnicos com restrição estrita de custo zero (Vercel Hobby, Supabase Free, Cloudflare R2 e bônus Google Pro)
 - Removed Sections: None
 - Follow-up TODOs: None
 -->
@@ -55,13 +50,21 @@ O Atelier é um espaço íntimo e pessoal; a segurança, privacidade e disponibi
 - Todas as operações de rede DEVEM possuir estados visuais explícitos de carregamento (skeletons delicados), erro amigável e estado vazio acolhedor (empty state ilustrado).
 *Racional*: Um santuário pessoal exige confiança absoluta de que registros, fotos íntimas e anotações estão protegidos e acessíveis a qualquer momento.
 
+### VI. Custo Financeiro Zero & Uso Exclusivo de Recursos Gratuitos / Bônus Pré-existentes (NON-NEGOTIABLE)
+O custo financeiro operacional contínuo do projeto DEVE ser estritamente ZERO (R$ 0,00). É terminantemente PROIBIDO adotar ferramentas, bancos de dados, APIs ou serviços de nuvem pagos ou que gerem cobranças variáveis não limitadas (*pay-as-you-go* sem teto rígido garantido de zero).
+- Toda a infraestrutura DEVE operar exclusivamente dentro de camadas perpétuas gratuitas (*Free Tiers* generosos: Vercel Hobby para hospedagem/CI-CD, Supabase Free Tier para PostgreSQL/Auth, Cloudflare R2 com 10GB de storage e zero custo de saída/egress).
+- Caso sejam incorporadas inteligências artificiais ou serviços cognitivos auxiliares, DEVE-SE utilizar no máximo cotas, créditos e bônus já inclusos na assinatura pré-existente do Google (Google Pro / Google One / Google AI Studio) do mantenedor, sem criar novas assinaturas ou custos extras.
+- O sistema DEVE adotar salvaguardas técnicas preventivas: compressão rigorosa de imagens no navegador antes do upload, cache local agressivo via Zustand e limites de requisição para assegurar que as cotas gratuitas jamais sejam violadas.
+*Racional*: O Atelier é um santuário pessoal e um presente; sob hipótese alguma deve se tornar um vetor de custos fixos recorrentes, faturas surpresa no cartão de crédito ou estresse financeiro.
+
 ## Padrões Técnicos & Restrições Estéticas
 
-### 1. Pilha Tecnológica Aprovada
-- **Frontend Móvel / Web**: React Native com Expo (SDK 52+, Nova Arquitetura, Expo Router) e/ou Next.js (App Router, Server + Client Components, Tailwind CSS).
+### 1. Pilha Tecnológica Aprovada (Conformidade com Custo Zero)
+- **Frontend Móvel / Web**: React Native com Expo (SDK 52+, Nova Arquitetura, Expo Router) e/ou Next.js (App Router, Server + Client Components, Tailwind CSS) com deploy gratuito na Vercel (Hobby Tier).
 - **Estilização**: Tailwind CSS / NativeWind com tokens de design estendidos (cores pastéis, bordas personalizadas, sombras scrapbook).
 - **Animações & Gestos**: Framer Motion (Web) / React Native Reanimated + Gesture Handler (Mobile).
-- **Backend & Armazenamento**: Supabase (PostgreSQL, Storage para mídias/polaroids, Auth, RLS) com deploy na Vercel.
+- **Backend & Armazenamento**: Supabase (PostgreSQL 500MB Free Tier, Auth, RLS) + Cloudflare R2 (10GB Free Tier com zero taxa de tráfego de saída).
+- **Inteligência / APIs Auxiliares**: Exclusivamente limites e bônus da assinatura pré-existente do Google Pro.
 
 ### 2. Design Tokens Oficiais (Tema Y2K Coquette Clean)
 - `palette.blush`: `#FDF2F4` (fundo suave), `#F8D7DA` (card/hover), `#F472B6` (destaque primário).
@@ -80,9 +83,10 @@ O Atelier é um espaço íntimo e pessoal; a segurança, privacidade e disponibi
 ### 2. Quality Gates Obrigatórios Pré-Merge/Entrega
 1. **Verificação de Tipos**: `npx tsc --noEmit` DEVE passar com zero erros.
 2. **Linting Rigoroso**: `npm run lint` ou `npx eslint .` DEVE passar sem advertências bloqueantes.
-3. **Ergonomia & Safe Area**: Layout DEVE ser verificado em dispositivos móveis reais ou simulados (Dynamic Island, notches e barras inferiores de navegação).
-4. **Estados de Interface**: Todo componente conectado a dados DEVE implementar estados visuais de `loading`, `error` e `empty state`.
-5. **Auditoria de Performance de Mídia**: Nenhuma imagem desotimizada ou sem placeholder pode ser entregue em produção.
+3. **Auditoria de Custo Zero**: Nenhum componente ou biblioteca que exija chave de API com tarifação ativa ou cartão cadastrado para cobrança pode ser introduzido.
+4. **Ergonomia & Safe Area**: Layout DEVE ser verificado em dispositivos móveis reais ou simulados (Dynamic Island, notches e barras inferiores de navegação).
+5. **Estados de Interface**: Todo componente conectado a dados DEVE implementar estados visuais de `loading`, `error` e `empty state`.
+6. **Auditoria de Performance de Mídia**: Nenhuma imagem desotimizada ou sem placeholder pode ser entregue em produção.
 
 ## Governance
 
@@ -92,6 +96,6 @@ O Atelier é um espaço íntimo e pessoal; a segurança, privacidade e disponibi
   - `MAJOR` (X.0.0): Quebra ou redefinição incompatível de princípios de governança, arquitetura ou design.
   - `MINOR` (0.X.0): Adição de novos princípios, seções ou diretrizes substantivas sem revogar as anteriores.
   - `PATCH` (0.0.X): Ajustes de redação, correções tipográficas ou esclarecimentos contextuais não normativos.
-- **Revisão de Conformidade**: Todas as especificações, planos de implementação e Pull Requests DEVEM validar conformidade direta com os 5 princípios centrais antes de serem aprovados.
+- **Revisão de Conformidade**: Todas as especificações, planos de implementação e Pull Requests DEVEM validar conformidade direta com os 6 princípios centrais antes de serem aprovados.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02
+**Version**: 1.1.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02

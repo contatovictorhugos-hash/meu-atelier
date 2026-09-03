@@ -39,6 +39,7 @@ The architecture leverages Next.js 15 (App Router) + Tailwind CSS deployed on Ve
 - **Principle III: Arquitetura Modular & Orientada a Configuração**: **PASS**. The 4 core modules are strictly decoupled and export typed contracts. Config-driven defaults allow instant theming and customization.
 - **Principle IV: Tipagem Estrita & Otimização Rigorosa de Mídia**: **PASS**. 100% strict TypeScript without `any`. Images are compressed on client side before upload to Cloudflare R2 and rendered with fixed aspect ratios and blur placeholders.
 - **Principle V: Privacidade do Santuário Pessoal & Resiliência Offline**: **PASS**. Supabase Row Level Security (RLS) is enabled across all tables (`auth.uid() = user_id`). Zustand local persistence ensures core routines and habits work offline.
+- **Principle VI: Custo Financeiro Zero & Recursos Gratuitos / Bônus Pré-existentes (NON-NEGOTIABLE)**: **PASS**. A arquitetura opera 100% dentro dos limites perpétuos gratuitos (Vercel Hobby, Supabase Free Tier, Cloudflare R2 com 10GB e zero egress fee). Qualquer serviço cognitivo/IA utiliza estritamente cotas e bônus da assinatura pré-existente do Google Pro do usuário, sem novos custos ou assinaturas.
 
 ## Project Structure
 
