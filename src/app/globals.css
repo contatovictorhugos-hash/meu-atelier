@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #FDF2F4;
+  color: #1E1B1E;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Safe area padding utilities */
+.safe-top {
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.safe-mb-bottom {
+  margin-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* Y2K Scrapbook tactile aesthetics */
+.polaroid-card {
+  background: #FCFBF7;
+  border-radius: 12px;
+  padding: 12px 12px 20px 12px;
+  box-shadow: 0 8px 24px -4px rgba(244, 114, 182, 0.15), 0 4px 6px -2px rgba(30, 27, 30, 0.04);
+  border: 1px solid rgba(251, 207, 232, 0.4);
+}
+
+.digicam-screen {
+  background: #0F172A;
+  color: #38BDF8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  border: 2px solid #94A3B8;
+  border-radius: 16px;
+}
+
+.sticker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(244, 114, 182, 0.3);
+  box-shadow: 0 2px 4px rgba(244, 114, 182, 0.1);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Hide scrollbar for tabs / carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
