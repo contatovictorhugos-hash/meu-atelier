@@ -5,6 +5,7 @@ __pycache__/
 
 # Node & Package Managers
 node_modules/
+.node/
 .pnp
 .pnp.js
 
@@ -30,3 +31,4 @@ out/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+*.tsbuildinfo

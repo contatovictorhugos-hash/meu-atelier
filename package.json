@@ -2,12 +2,14 @@
   "name": "atelier-dashboard",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/unit/*.ts tests/integration/*.ts tests/blackbox/*.ts tests/whitebox/*.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
+import type {
   StudyCourse,
   StudyNote,
   StudyDeadline,
   DeadlineStatus,
-} from '@/types/database.types';
+} from '../types/database.types.ts';
 
 interface LegalState {
   courses: StudyCourse[];

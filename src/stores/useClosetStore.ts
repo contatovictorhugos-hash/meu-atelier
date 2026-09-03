@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { WardrobeItem, Outfit, WardrobeCategory, OccasionTag } from '@/types/database.types';
+import type { WardrobeItem, Outfit, WardrobeCategory, OccasionTag } from '../types/database.types.ts';
 
 interface ClosetState {
   wardrobeItems: WardrobeItem[];

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MealPlanItem, ShoppingItem, GroceryCategory } from '@/types/database.types';
+import type { MealPlanItem, ShoppingItem, GroceryCategory } from '../types/database.types.ts';
 
 export interface PrepTask {
   id: string;
