@@ -16,7 +16,7 @@ const WEEKDAY_NAMES: Record<number, string> = {
 };
 
 export const CourseCards: React.FC = () => {
-  const { courses, updateCourseProgress, deleteCourse } = useLegalStore();
+  const { courses, notes, deadlines, updateCourseProgress, deleteCourse } = useLegalStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<StudyCourse | null>(null);
 
@@ -31,7 +31,15 @@ export const CourseCards: React.FC = () => {
   };
 
   const handleDelete = (course: StudyCourse) => {
-    if (window.confirm(`Deseja excluir a matéria "${course.name}"?`)) {
+    const linkedNotes = notes.filter((n) => n.course_id === course.id).length;
+    const linkedDeadlines = deadlines.filter((d) => d.course_id === course.id).length;
+
+    let confirmMessage = `Deseja excluir a matéria "${course.name}"?`;
+    if (linkedNotes > 0 || linkedDeadlines > 0) {
+      confirmMessage += `\n\nAtenção: esta matéria possui ${linkedNotes} fichamento(s) e ${linkedDeadlines} prazo(s) associados.`;
+    }
+
+    if (window.confirm(confirmMessage)) {
       deleteCourse(course.id);
     }
   };

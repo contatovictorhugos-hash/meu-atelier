@@ -63,102 +63,112 @@ export const WeeklyMealGrid: React.FC = () => {
       {/* Grid de 7 Dias */}
       <div className="space-y-3">
         {DAYS.map((day) => {
-          const meal = weeklyMeals.find((m) => m.day_of_week === day.num);
+          const dayMeals = weeklyMeals.filter((m) => m.day_of_week === day.num);
           const isToday = currentDayNum === day.num;
 
           return (
             <div
               key={day.num}
-              className={`bg-[#FCFBF7] rounded-3xl p-3.5 border transition-all ${
+              className={`bg-[#FCFBF7] rounded-3xl p-4 border transition-all ${
                 isToday
                   ? 'border-pink-400 ring-2 ring-pink-300/40 shadow-sm bg-linear-to-r from-[#FCFBF7] to-pink-50/40'
                   : 'border-pink-200/60 shadow-xs hover:border-pink-300'
               }`}
             >
-              {meal ? (
-                <div className="flex items-center gap-3.5">
-                  {/* Foto da Marmita */}
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-stone-100 shrink-0 border border-pink-100 relative group">
-                    {meal.photo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={meal.photo_url}
-                        alt={meal.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-300 text-xl">
-                        🍱
-                      </div>
-                    )}
-                  </div>
+              {/* Day Header */}
+              <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-pink-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#4A1525] uppercase tracking-wide">
+                    {day.name}
+                  </span>
+                  {isToday && (
+                    <span className="text-[9px] font-bold text-pink-700 bg-pink-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <Sparkles className="w-2.5 h-2.5" /> Hoje
+                    </span>
+                  )}
+                  {dayMeals.length > 0 && (
+                    <span className="text-[10px] text-stone-500 font-medium bg-stone-100 px-2 py-0.5 rounded-full">
+                      {dayMeals.length} {dayMeals.length === 1 ? 'refeição' : 'refeições'}
+                    </span>
+                  )}
+                </div>
 
-                  {/* Informações da Refeição */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1 gap-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-bold text-pink-600 uppercase tracking-wide">
-                          {day.name}
-                        </span>
-                        {isToday && (
-                          <span className="text-[9px] font-bold text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                            <Sparkles className="w-2.5 h-2.5" /> Hoje
-                          </span>
+                <button
+                  onClick={() => handleOpenAdd(day.num)}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-pink-700 hover:text-[#4A1525] min-h-[36px] px-2 py-1 rounded-full hover:bg-pink-100/60 transition-colors"
+                >
+                  <Plus className="w-3 h-3" /> Adicionar
+                </button>
+              </div>
+
+              {/* Meals List for this Day */}
+              {dayMeals.length > 0 ? (
+                <div className="space-y-2.5">
+                  {dayMeals.map((meal) => (
+                    <div
+                      key={meal.id}
+                      className="flex items-center gap-3 p-2 rounded-2xl bg-white/80 border border-pink-100 shadow-2xs hover:border-pink-200 transition-colors"
+                    >
+                      {/* Foto da Marmita */}
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-pink-100 relative">
+                        {meal.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={meal.photo_url}
+                            alt={meal.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-300 text-lg">
+                            🍱
+                          </div>
                         )}
                       </div>
-                      <Badge variant="blush">{meal.meal_type || 'Almoço'}</Badge>
+
+                      {/* Informações da Refeição */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <Badge variant="blush">{meal.meal_type || 'Almoço'}</Badge>
+                        </div>
+
+                        <h4 className="text-xs font-semibold text-[#4A1525] truncate">
+                          {meal.title}
+                        </h4>
+
+                        {meal.ingredients && meal.ingredients.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {meal.ingredients.slice(0, 3).map((ing, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[9px] text-stone-500 bg-stone-50 px-1.5 py-0.5 rounded-md border border-stone-200/50"
+                              >
+                                {ing}
+                              </span>
+                            ))}
+                            {meal.ingredients.length > 3 && (
+                              <span className="text-[9px] text-stone-400 self-center">
+                                +{meal.ingredients.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botão de Edição */}
+                      <button
+                        onClick={() => handleOpenEdit(meal)}
+                        className="p-2 text-stone-400 hover:text-[#4A1525] hover:bg-pink-100/50 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                        aria-label={`Editar ${meal.title}`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-
-                    <h4 className="text-xs font-semibold text-[#4A1525] truncate">
-                      {meal.title}
-                    </h4>
-
-                    {meal.ingredients && meal.ingredients.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {meal.ingredients.slice(0, 3).map((ing, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[9px] text-stone-500 bg-white px-2 py-0.5 rounded-md border border-stone-200/60"
-                          >
-                            {ing}
-                          </span>
-                        ))}
-                        {meal.ingredients.length > 3 && (
-                          <span className="text-[9px] text-stone-400 self-center">
-                            +{meal.ingredients.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Botão de Edição */}
-                  <button
-                    onClick={() => handleOpenEdit(meal)}
-                    className="p-2 text-stone-400 hover:text-[#4A1525] hover:bg-pink-100/50 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
-                    aria-label={`Editar refeição de ${day.name}`}
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
+                  ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-between py-1 px-1">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-stone-500">
-                        {day.name}
-                      </span>
-                      {isToday && (
-                        <span className="text-[9px] font-bold text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded-full">
-                          Hoje ✨
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-stone-400 mt-0.5">
-                      Nenhuma refeição planejada
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between py-2 px-1 text-stone-400">
+                  <span className="text-xs">Nenhuma refeição planejada para este dia</span>
                   <button
                     onClick={() => handleOpenAdd(day.num)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold text-pink-700 bg-pink-50 hover:bg-pink-100 border border-pink-200/60 transition-colors min-h-[44px]"
