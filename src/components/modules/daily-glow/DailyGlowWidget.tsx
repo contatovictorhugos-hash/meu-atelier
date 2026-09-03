@@ -9,6 +9,7 @@ import { Sparkles, Camera, Heart } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { ImageUploadField } from '@/components/ui/ImageUploadField';
 
 export const DailyGlowWidget: React.FC = () => {
   const {
@@ -109,16 +110,13 @@ export const DailyGlowWidget: React.FC = () => {
         title="Destaque de Hoje 🎀"
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
-              URL da Foto do Dia (Polaroid)
-            </label>
-            <Input
-              value={photoInput}
-              onChange={(e) => setPhotoInput(e.target.value)}
-              placeholder="https://exemplo.com/minha-foto.jpg"
-            />
-          </div>
+          <ImageUploadField
+            label="Foto do Dia (Polaroid)"
+            value={photoInput}
+            onChange={setPhotoInput}
+            placeholderLink="https://exemplo.com/minha-foto.jpg"
+            description="WebP leve para polaroid diária"
+          />
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">
               Frase ou Afirmação de Hoje
