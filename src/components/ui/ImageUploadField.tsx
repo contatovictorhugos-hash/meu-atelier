@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Upload, X } from 'lucide-react';
 import { compressImageToWebp } from '@/lib/utils/image-compression';
+import { uploadMediaToSupabase } from '@/lib/supabase/storage';
 import { Input } from './Input';
 
 interface ImageUploadFieldProps {
@@ -11,6 +12,7 @@ interface ImageUploadFieldProps {
   label?: string;
   placeholderLink?: string;
   description?: string;
+  folder?: 'looks' | 'wardrobe' | 'meals' | 'daily' | 'study';
 }
 
 export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
@@ -18,7 +20,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   onChange,
   label = 'Foto',
   placeholderLink = 'https://exemplo.com/imagem.jpg',
-  description = 'WebP automático & leve',
+  description = 'WebP permanente no Supabase Storage',
+  folder = 'looks',
 }) => {
   const [isCompressing, setIsCompressing] = useState(false);
 
@@ -35,15 +38,13 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     try {
       setIsCompressing(true);
       const compressedBlob = await compressImageToWebp(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          onChange(reader.result);
-        }
-      };
-      reader.readAsDataURL(compressedBlob);
+      const publicUrl = await uploadMediaToSupabase({
+        file: compressedBlob,
+        folder,
+      });
+      onChange(publicUrl);
     } catch (err) {
-      console.error('Erro na compressão de imagem:', err);
+      console.error('Erro no upload de imagem:', err);
     } finally {
       setIsCompressing(false);
       e.target.value = '';

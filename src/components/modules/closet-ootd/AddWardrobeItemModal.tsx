@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { useClosetStore } from '@/stores/useClosetStore';
 import { WardrobeCategory } from '@/types/database.types';
 import { compressImageToWebp } from '@/lib/utils/image-compression';
+import { uploadMediaToSupabase } from '@/lib/supabase/storage';
 import { Upload, Sparkles } from 'lucide-react';
 
 interface AddWardrobeItemModalProps {
@@ -39,15 +40,13 @@ export const AddWardrobeItemModal: React.FC<AddWardrobeItemModalProps> = ({
     try {
       setIsCompressing(true);
       const compressedBlob = await compressImageToWebp(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImageUrl(reader.result);
-        }
-      };
-      reader.readAsDataURL(compressedBlob);
+      const publicUrl = await uploadMediaToSupabase({
+        file: compressedBlob,
+        folder: 'wardrobe',
+      });
+      setImageUrl(publicUrl);
     } catch (err) {
-      console.error('Erro na compressão:', err);
+      console.error('Erro no upload para o Supabase Storage:', err);
     } finally {
       setIsCompressing(false);
     }

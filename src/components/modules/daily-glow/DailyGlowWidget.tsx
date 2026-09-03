@@ -18,6 +18,8 @@ export const DailyGlowWidget: React.FC = () => {
     setDailyPhotoUrl,
     setDailyQuote,
     resetDailyIfNewDay,
+    fetchDailyGlow,
+    isLoading,
   } = useDailyGlowStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +30,7 @@ export const DailyGlowWidget: React.FC = () => {
 
   useEffect(() => {
     resetDailyIfNewDay();
+    fetchDailyGlow();
     const now = new Date();
     setMountedDate(
       now.toLocaleDateString('pt-BR', {
@@ -37,7 +40,7 @@ export const DailyGlowWidget: React.FC = () => {
       })
     );
     setShortDate(now.toLocaleDateString('pt-BR'));
-  }, [resetDailyIfNewDay]);
+  }, [resetDailyIfNewDay, fetchDailyGlow]);
 
   const handleSaveHighlights = () => {
     if (photoInput.trim()) setDailyPhotoUrl(photoInput.trim());
@@ -115,7 +118,8 @@ export const DailyGlowWidget: React.FC = () => {
             value={photoInput}
             onChange={setPhotoInput}
             placeholderLink="https://exemplo.com/minha-foto.jpg"
-            description="WebP leve para polaroid diária"
+            description="WebP permanente no Supabase Storage"
+            folder="daily"
           />
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">

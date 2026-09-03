@@ -1,14 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CourseCards } from '@/components/modules/legal-binder/CourseCards';
 import { StudyNotes } from '@/components/modules/legal-binder/StudyNotes';
 import { DeadlineTracker } from '@/components/modules/legal-binder/DeadlineTracker';
 import { FocusTimer } from '@/components/modules/legal-binder/FocusTimer';
+import { useLegalStore } from '@/stores/useLegalStore';
 import { Scale } from 'lucide-react';
 
 export default function LegalPage() {
+  const { fetchLegal } = useLegalStore();
   const [activeTab, setActiveTab] = useState<'courses' | 'notes' | 'deadlines' | 'pomodoro'>('courses');
+
+  useEffect(() => {
+    fetchLegal();
+  }, [fetchLegal]);
 
   return (
     <div className="space-y-4">

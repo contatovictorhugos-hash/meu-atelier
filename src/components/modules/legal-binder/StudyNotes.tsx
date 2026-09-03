@@ -58,6 +58,12 @@ export const StudyNotes: React.FC = () => {
         </Button>
       </div>
 
+      {notes.length === 0 && (
+        <div className="p-8 text-center bg-[#FCFBF7] rounded-3xl border border-dashed border-pink-200 text-stone-500 text-xs">
+          Nenhum fichamento registrado ainda. Toque em &ldquo;Novo Fichamento&rdquo; para catalogar suas anotações com fotos do Vade Mecum!
+        </div>
+      )}
+
       <div className="space-y-3">
         {notes.map((note) => {
           const course = courses.find((c) => c.id === note.course_id);
@@ -165,7 +171,8 @@ export const StudyNotes: React.FC = () => {
             value={photoUrl}
             onChange={setPhotoUrl}
             placeholderLink="https://exemplo.com/foto-pagina.jpg"
-            description="Foto da página de lei ou anotação"
+            description="Foto permanente no Supabase Storage"
+            folder="study"
           />
 
           <div>

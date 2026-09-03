@@ -1,8 +1,26 @@
+import imageCompression from 'browser-image-compression';
+
 /**
  * Browser Image Compression Utility
- * Resizes images to max 1200px and converts to WebP under 350KB
+ * Compresses images to ~150KB WebP with max 1200px dimension
  */
 export async function compressImageToWebp(file: File): Promise<Blob> {
+  // 1. Primary: browser-image-compression (~150KB WebP)
+  try {
+    const options = {
+      maxSizeMB: 0.15, // ~150KB
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+      fileType: 'image/webp',
+      initialQuality: 0.82,
+    };
+    const compressed = await imageCompression(file, options);
+    return compressed;
+  } catch (err) {
+    console.warn('[Atelier] Fallback para compressão via Canvas:', err);
+  }
+
+  // 2. Secondary Fallback: Canvas API
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
