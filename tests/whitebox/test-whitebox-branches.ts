@@ -2,6 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { useDailyGlowStore } from '../../src/stores/useDailyGlowStore.ts';
 import { useClosetStore } from '../../src/stores/useClosetStore.ts';
+import { useLegalStore } from '../../src/stores/useLegalStore.ts';
+import { useMealStore } from '../../src/stores/useMealStore.ts';
 import { formatDate, cn } from '../../src/lib/utils/utils.ts';
 import { POST } from '../../src/app/api/upload/presigned/route.ts';
 
@@ -78,5 +80,86 @@ describe('White-Box Tests: Statement, Branch & Decision Paths', () => {
 
     assert.doesNotMatch(data.publicUrl, /[\s&!#$]/);
     assert.match(data.publicUrl, /foto_com_espa_os___s_mbolos___\.jpg/);
+  });
+
+  test('Branch Coverage in useLegalStore: deleteCourse activeCourseId and updateCourseProgress clamping', () => {
+    useLegalStore.setState({
+      courses: [
+        { id: 'c-branch-1', name: 'Course 1', color_accent: '#fff', progress_percentage: 10 },
+        { id: 'c-branch-2', name: 'Course 2', color_accent: '#fff', progress_percentage: 20 },
+      ],
+      activeCourseId: 'c-branch-1',
+    });
+
+    const store = useLegalStore.getState();
+
+    // Branch: delete matching active course -> resets to 'all'
+    store.deleteCourse('c-branch-1');
+    assert.equal(useLegalStore.getState().activeCourseId, 'all');
+
+    // Branch: delete non-matching active course -> preserves activeCourseId
+    useLegalStore.setState({ activeCourseId: 'c-branch-2' });
+    store.deleteCourse('non-existent');
+    assert.equal(useLegalStore.getState().activeCourseId, 'c-branch-2');
+
+    // Branch clamping in updateCourseProgress: < 0, > 100, and valid
+    store.updateCourseProgress('c-branch-2', -50);
+    assert.equal(useLegalStore.getState().courses.find((c) => c.id === 'c-branch-2')?.progress_percentage, 0);
+
+    store.updateCourseProgress('c-branch-2', 150);
+    assert.equal(useLegalStore.getState().courses.find((c) => c.id === 'c-branch-2')?.progress_percentage, 100);
+
+    store.updateCourseProgress('c-branch-2', 65);
+    assert.equal(useLegalStore.getState().courses.find((c) => c.id === 'c-branch-2')?.progress_percentage, 65);
+  });
+
+  test('Branch Coverage in useMealStore.saveMeal: id match, day/type match, and new meal insertion', () => {
+    useMealStore.setState({
+      weeklyMeals: [
+        {
+          id: 'meal-branch-1',
+          day_of_week: 1,
+          meal_type: 'Almoço',
+          title: 'Existing Monday Lunch',
+          ingredients: ['Ing 1'],
+        },
+      ],
+    });
+
+    const store = useMealStore.getState();
+
+    // Branch 1: Match by ID explicitly
+    store.saveMeal({
+      id: 'meal-branch-1',
+      day_of_week: 1,
+      meal_type: 'Almoço',
+      title: 'Updated Monday Lunch by ID',
+      ingredients: ['Ing 1 Updated'],
+    });
+    assert.equal(useMealStore.getState().weeklyMeals.length, 1);
+    assert.equal(useMealStore.getState().weeklyMeals[0].title, 'Updated Monday Lunch by ID');
+
+    // Branch 2: Match by day_of_week + meal_type (without ID or different ID)
+    store.saveMeal({
+      day_of_week: 1,
+      meal_type: 'Almoço',
+      title: 'Updated Monday Lunch by Slot',
+      ingredients: ['Ing 1 Slot'],
+    });
+    assert.equal(useMealStore.getState().weeklyMeals.length, 1);
+    assert.equal(useMealStore.getState().weeklyMeals[0].id, 'meal-branch-1');
+    assert.equal(useMealStore.getState().weeklyMeals[0].title, 'Updated Monday Lunch by Slot');
+
+    // Branch 3: No match on ID or day/type -> creates new meal with generated temp ID
+    store.saveMeal({
+      day_of_week: 2,
+      meal_type: 'Jantar',
+      title: 'New Tuesday Dinner',
+      ingredients: ['Ing 2'],
+    });
+    assert.equal(useMealStore.getState().weeklyMeals.length, 2);
+    const newMeal = useMealStore.getState().weeklyMeals.find((m) => m.day_of_week === 2);
+    assert.ok(newMeal);
+    assert.match(newMeal.id, /^m_/);
   });
 });

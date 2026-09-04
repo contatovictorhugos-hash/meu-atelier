@@ -157,4 +157,116 @@ describe('Unit Tests: LegalStore (Law Courses, Fichamentos & Deadlines)', () => 
     assert.equal(remaining.find((c) => c.id === 'c2'), undefined);
     assert.equal(useLegalStore.getState().activeCourseId, 'all');
   });
+
+  test('partially updates a study note preserving untouched fields', () => {
+    const store = useLegalStore.getState();
+
+    // Partial update 1: only summary_text
+    store.updateStudyNote('n1', {
+      summary_text: 'Novo resumo apenas, sem alterar o resto.',
+    });
+
+    let note = useLegalStore.getState().notes.find((n) => n.id === 'n1');
+    assert.equal(note?.summary_text, 'Novo resumo apenas, sem alterar o resto.');
+    assert.equal(note?.title, 'Controle Difuso'); // preserved
+    assert.deepEqual(note?.tags, ['STF']); // preserved
+    assert.equal(note?.created_at, '2026-09-01'); // preserved
+    assert.equal(note?.course_id, 'c1'); // preserved
+
+    // Partial update 2: only tags
+    store.updateStudyNote('n1', {
+      tags: ['STF', 'Repercussão Geral'],
+    });
+
+    note = useLegalStore.getState().notes.find((n) => n.id === 'n1');
+    assert.deepEqual(note?.tags, ['STF', 'Repercussão Geral']);
+    assert.equal(note?.summary_text, 'Novo resumo apenas, sem alterar o resto.'); // preserved
+    assert.equal(note?.title, 'Controle Difuso'); // preserved
+  });
+
+  test('partially updates a study deadline preserving untouched fields', () => {
+    const store = useLegalStore.getState();
+
+    // Partial update 1: only due_date
+    store.updateDeadline('d1', {
+      due_date: '2026-09-30',
+    });
+
+    let deadline = useLegalStore.getState().deadlines.find((d) => d.id === 'd1');
+    assert.equal(deadline?.due_date, '2026-09-30');
+    assert.equal(deadline?.title, 'Peça Inicial'); // preserved
+    assert.equal(deadline?.status, 'Não iniciado'); // preserved
+    assert.equal(deadline?.course_id, 'c1'); // preserved
+
+    // Partial update 2: only status
+    store.updateDeadline('d1', {
+      status: 'Em rascunho',
+    });
+
+    deadline = useLegalStore.getState().deadlines.find((d) => d.id === 'd1');
+    assert.equal(deadline?.status, 'Em rascunho');
+    assert.equal(deadline?.due_date, '2026-09-30'); // preserved
+    assert.equal(deadline?.title, 'Peça Inicial'); // preserved
+  });
+
+  test('handles update or deletion of non-existent items gracefully without mutating store', () => {
+    const store = useLegalStore.getState();
+    const initialCourses = [...store.courses];
+    const initialNotes = [...store.notes];
+    const initialDeadlines = [...store.deadlines];
+
+    // Course operations on non-existent ID
+    assert.doesNotThrow(() => {
+      store.updateCourse('c-nonexistent', { name: 'Curso Fantasma' });
+      store.updateCourseProgress('c-nonexistent', 80);
+      store.deleteCourse('c-nonexistent');
+    });
+    assert.deepEqual(useLegalStore.getState().courses, initialCourses);
+
+    // Note operations on non-existent ID
+    assert.doesNotThrow(() => {
+      store.updateStudyNote('n-nonexistent', { title: 'Nota Fantasma' });
+      store.deleteStudyNote('n-nonexistent');
+    });
+    assert.deepEqual(useLegalStore.getState().notes, initialNotes);
+
+    // Deadline operations on non-existent ID
+    assert.doesNotThrow(() => {
+      store.updateDeadline('d-nonexistent', { title: 'Prazo Fantasma' });
+      store.updateDeadlineStatus('d-nonexistent', 'Finalizado');
+      store.deleteDeadline('d-nonexistent');
+    });
+    assert.deepEqual(useLegalStore.getState().deadlines, initialDeadlines);
+  });
+
+  test('maintains strict integrity of remaining notes and deadlines during item modifications', () => {
+    const store = useLegalStore.getState();
+
+    // Populate with multiple notes and deadlines
+    store.addStudyNote({
+      course_id: 'c2',
+      title: 'Responsabilidade Civil Subjetiva',
+      summary_text: 'Dolo, culpa e nexo de causalidade.',
+      tags: ['Civil', 'CC/02'],
+    });
+
+    const notes = useLegalStore.getState().notes;
+    assert.equal(notes.length, 2);
+    const originalSecondNote = { ...notes[1] }; // n1
+
+    // Update first note (the newly added one)
+    const newNoteId = notes[0].id;
+    store.updateStudyNote(newNoteId, { title: 'Responsabilidade Civil Objetiva' });
+
+    // Assert second note remained completely untouched
+    const secondNoteAfter = useLegalStore.getState().notes.find((n) => n.id === originalSecondNote.id);
+    assert.deepEqual(secondNoteAfter, originalSecondNote);
+
+    // Delete newly added note
+    store.deleteStudyNote(newNoteId);
+    const notesAfterDelete = useLegalStore.getState().notes;
+    assert.equal(notesAfterDelete.length, 1);
+    assert.deepEqual(notesAfterDelete[0], originalSecondNote);
+  });
 });
+
