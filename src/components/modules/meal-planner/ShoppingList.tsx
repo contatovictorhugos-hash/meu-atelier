@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { useMealStore } from '@/stores/useMealStore';
-import { GroceryCategory } from '@/types/database.types';
-import { Plus, Trash2, Check } from 'lucide-react';
+import { GroceryCategory, ShoppingItem } from '@/types/database.types';
+import { Plus, Trash2, Check, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
 import { cn } from '@/lib/utils/utils';
 
 export const ShoppingList: React.FC = () => {
@@ -13,12 +14,18 @@ export const ShoppingList: React.FC = () => {
     shoppingItems,
     toggleShoppingItem,
     addShoppingItem,
+    updateShoppingItem,
     deleteShoppingItem,
     clearCompletedShoppingItems,
   } = useMealStore();
 
   const [itemName, setItemName] = useState('');
   const [category, setCategory] = useState<GroceryCategory>('Hortifrúti');
+
+  // Estado de Edição
+  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState<GroceryCategory>('Hortifrúti');
 
   const completedCount = shoppingItems.filter((i) => i.is_completed).length;
 
@@ -34,6 +41,28 @@ export const ShoppingList: React.FC = () => {
     if (!itemName.trim()) return;
     addShoppingItem(itemName.trim(), category);
     setItemName('');
+  };
+
+  const handleOpenEdit = (item: ShoppingItem) => {
+    setEditingItem(item);
+    setEditName(item.item_name);
+    setEditCategory(item.category);
+  };
+
+  const handleCloseEdit = () => {
+    setEditingItem(null);
+    setEditName('');
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem && editName.trim()) {
+      updateShoppingItem(editingItem.id, {
+        item_name: editName.trim(),
+        category: editCategory,
+      });
+      handleCloseEdit();
+    }
   };
 
   return (
@@ -58,19 +87,22 @@ export const ShoppingList: React.FC = () => {
       </div>
 
       {/* Add Item Form */}
-      <form onSubmit={handleAdd} className="p-3 bg-white rounded-3xl border border-pink-200/70 shadow-sm space-y-2">
+      <form onSubmit={handleAdd} className="space-y-2">
         <div className="flex gap-2">
           <Input
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
-            placeholder="Adicionar item à feira..."
-            className="flex-1 text-xs"
+            placeholder="Adicionar ingrediente ou produto..."
+            className="min-h-[44px]"
+            aria-label="Novo item de compra"
           />
-          <Button type="submit" className="shrink-0">
-            <Plus className="w-4 h-4 mr-1" /> Add
+          <Button type="submit" className="shrink-0 flex items-center gap-1 min-h-[44px]">
+            <Plus className="w-3.5 h-3.5" /> Adicionar
           </Button>
         </div>
-        <div className="flex gap-1 overflow-x-auto no-scrollbar pt-1">
+
+        {/* Category Selector for New Item */}
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -118,7 +150,7 @@ export const ShoppingList: React.FC = () => {
                   >
                     <button
                       onClick={() => toggleShoppingItem(item.id)}
-                      className="flex items-center gap-2.5 flex-1 text-left"
+                      className="flex items-center gap-2.5 flex-1 text-left min-h-[36px]"
                     >
                       <div
                         className={cn(
@@ -142,13 +174,26 @@ export const ShoppingList: React.FC = () => {
                         {item.item_name}
                       </span>
                     </button>
-                    <button
-                      onClick={() => deleteShoppingItem(item.id)}
-                      className="p-2 text-stone-300 hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                      aria-label="Remover item"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(item)}
+                        className="p-2 text-stone-400 hover:text-[#4A1525] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label={`Editar item ${item.item_name}`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteShoppingItem(item.id)}
+                        className="p-2 text-stone-300 hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label={`Remover item ${item.item_name}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -156,6 +201,57 @@ export const ShoppingList: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Modal de Edição */}
+      <Modal
+        isOpen={!!editingItem}
+        onClose={handleCloseEdit}
+        title="Editar Item de Compra 🛒"
+      >
+        <form onSubmit={handleSaveEdit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+              Nome do Ingrediente ou Produto
+            </label>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Ex: Cenoura ralada"
+              className="min-h-[44px]"
+              aria-label="Nome do item de compra"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+              Categoria / Corredor
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setEditCategory(cat)}
+                  className={cn(
+                    'p-2.5 rounded-2xl text-xs font-medium border text-center transition-all min-h-[44px]',
+                    editCategory === cat
+                      ? 'bg-[#4A1525] text-white border-[#4A1525] shadow-xs'
+                      : 'bg-white border-pink-200 text-stone-700 hover:bg-pink-50'
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <Button type="submit" className="w-full min-h-[44px]">
+              Salvar Alterações
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

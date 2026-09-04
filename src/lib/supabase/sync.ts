@@ -334,6 +334,24 @@ export async function toggleUserPrepTask(
   if (error) console.warn('[Sync] Erro ao atualizar prep task:', error.message);
 }
 
+export async function updateUserPrepTask(
+  id: string,
+  task: string
+): Promise<void> {
+  if (!isConfigured()) return;
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return;
+
+  const { error } = await supabase
+    .from('prep_tasks')
+    .update({ task })
+    .eq('id', id)
+    .eq('user_id', userData.user.id);
+
+  if (error) console.warn('[Sync] Erro ao atualizar texto da prep task:', error.message);
+}
+
 export async function deleteUserPrepTask(id: string): Promise<void> {
   if (!isConfigured()) return;
   const supabase = createClient();
@@ -423,6 +441,24 @@ export async function deleteUserShoppingItem(id: string): Promise<void> {
     .eq('user_id', userData.user.id);
 
   if (error) console.warn('[Sync] Erro ao deletar item de compra:', error.message);
+}
+
+export async function updateUserShoppingItem(
+  id: string,
+  updates: { item_name?: string; category?: GroceryCategory }
+): Promise<void> {
+  if (!isConfigured()) return;
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return;
+
+  const { error } = await supabase
+    .from('shopping_items')
+    .update(updates)
+    .eq('id', id)
+    .eq('user_id', userData.user.id);
+
+  if (error) console.warn('[Sync] Erro ao atualizar item de compra:', error.message);
 }
 
 export async function clearCompletedUserShoppingItems(): Promise<void> {
@@ -580,6 +616,24 @@ export async function deleteUserNote(id: string): Promise<void> {
   if (error) console.warn('[Sync] Erro ao deletar fichamento:', error.message);
 }
 
+export async function updateUserNote(
+  id: string,
+  updates: Partial<Omit<StudyNote, 'id' | 'user_id' | 'created_at'>>
+): Promise<void> {
+  if (!isConfigured()) return;
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return;
+
+  const { error } = await supabase
+    .from('study_notes')
+    .update(updates)
+    .eq('id', id)
+    .eq('user_id', userData.user.id);
+
+  if (error) console.warn('[Sync] Erro ao atualizar fichamento:', error.message);
+}
+
 export async function fetchUserDeadlines(): Promise<StudyDeadline[] | null> {
   if (!isConfigured()) return null;
   const supabase = createClient();
@@ -639,6 +693,24 @@ export async function updateUserDeadlineStatus(
     .eq('user_id', userData.user.id);
 
   if (error) console.warn('[Sync] Erro ao atualizar status do prazo:', error.message);
+}
+
+export async function updateUserDeadline(
+  id: string,
+  updates: Partial<Omit<StudyDeadline, 'id' | 'user_id'>>
+): Promise<void> {
+  if (!isConfigured()) return;
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return;
+
+  const { error } = await supabase
+    .from('study_deadlines')
+    .update(updates)
+    .eq('id', id)
+    .eq('user_id', userData.user.id);
+
+  if (error) console.warn('[Sync] Erro ao atualizar prazo:', error.message);
 }
 
 export async function deleteUserDeadline(id: string): Promise<void> {

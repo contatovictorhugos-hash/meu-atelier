@@ -2,23 +2,52 @@
 
 import React, { useState } from 'react';
 import { useLegalStore } from '@/stores/useLegalStore';
+import { StudyNote } from '@/types/database.types';
 import { PolaroidFrame } from '@/components/layout/PolaroidFrame';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { ImageUploadField } from '@/components/ui/ImageUploadField';
-import { Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Plus, Sparkles, Trash2, Pencil } from 'lucide-react';
 import { formatDate } from '@/lib/utils/utils';
 
 export const StudyNotes: React.FC = () => {
-  const { notes, courses, addStudyNote, deleteStudyNote } = useLegalStore();
+  const { notes, courses, addStudyNote, updateStudyNote, deleteStudyNote } = useLegalStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<StudyNote | null>(null);
+
   const [courseId, setCourseId] = useState(courses[0]?.id || '');
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
   const [tagInput, setTagInput] = useState('');
+
+  const handleOpenAdd = () => {
+    setSelectedNote(null);
+    setCourseId(courses[0]?.id || '');
+    setTitle('');
+    setSummary('');
+    setPhotoUrl('');
+    setTagInput('');
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (note: StudyNote) => {
+    setSelectedNote(note);
+    setCourseId(note.course_id);
+    setTitle(note.title);
+    setSummary(note.summary_text);
+    setPhotoUrl(note.photo_url || '');
+    setTagInput(note.tags.join(', '));
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (note: StudyNote) => {
+    if (window.confirm(`Deseja realmente excluir o fichamento "${note.title}"?`)) {
+      deleteStudyNote(note.id);
+    }
+  };
 
   const handleSave = () => {
     if (!title.trim() || !summary.trim()) return;
@@ -28,18 +57,31 @@ export const StudyNotes: React.FC = () => {
       .map((t) => t.trim())
       .filter(Boolean);
 
-    addStudyNote({
-      course_id: courseId,
-      title: title.trim(),
-      summary_text: summary.trim(),
-      photo_url: photoUrl.trim() || undefined,
-      tags: tags.length > 0 ? tags : ['Fichamento'],
-    });
+    const resolvedCourseId = courseId || courses[0]?.id || '';
+
+    if (selectedNote) {
+      updateStudyNote(selectedNote.id, {
+        course_id: resolvedCourseId,
+        title: title.trim(),
+        summary_text: summary.trim(),
+        photo_url: photoUrl.trim() || undefined,
+        tags: tags.length > 0 ? tags : ['Fichamento'],
+      });
+    } else {
+      addStudyNote({
+        course_id: resolvedCourseId,
+        title: title.trim(),
+        summary_text: summary.trim(),
+        photo_url: photoUrl.trim() || undefined,
+        tags: tags.length > 0 ? tags : ['Fichamento'],
+      });
+    }
 
     setTitle('');
     setSummary('');
     setPhotoUrl('');
     setTagInput('');
+    setSelectedNote(null);
     setIsModalOpen(false);
   };
 
@@ -50,9 +92,9 @@ export const StudyNotes: React.FC = () => {
           Micro-Fichamentos & Resumos 📑
         </h3>
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenAdd}
           size="sm"
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 min-h-[44px]"
         >
           <Plus className="w-3.5 h-3.5" /> Novo Fichamento
         </Button>
@@ -77,14 +119,23 @@ export const StudyNotes: React.FC = () => {
                 <Badge variant="bordeaux">
                   {course?.name || 'Direito'}
                 </Badge>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <span className="text-[10px] text-stone-400 font-mono">
                     {formatDate(note.created_at)}
                   </span>
+                  {/* Botão Editar Fichamento */}
                   <button
-                    onClick={() => deleteStudyNote(note.id)}
-                    className="p-1 text-stone-300 hover:text-red-500 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
-                    aria-label="Excluir nota"
+                    onClick={() => handleOpenEdit(note)}
+                    className="p-2 text-stone-400 hover:text-[#4A1525] hover:bg-white/60 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    aria-label={`Editar fichamento ${note.title}`}
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  {/* Botão Excluir Fichamento */}
+                  <button
+                    onClick={() => handleDelete(note)}
+                    className="p-2 text-stone-300 hover:text-red-500 hover:bg-white/60 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    aria-label={`Excluir fichamento ${note.title}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -118,11 +169,14 @@ export const StudyNotes: React.FC = () => {
         })}
       </div>
 
-      {/* Add Modal */}
+      {/* Modal de Criação / Edição */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Novo Micro-Fichamento ⚖️"
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedNote(null);
+        }}
+        title={selectedNote ? 'Editar Micro-Fichamento ✏️' : 'Novo Micro-Fichamento ⚖️'}
       >
         <div className="space-y-3">
           <div>
@@ -133,6 +187,7 @@ export const StudyNotes: React.FC = () => {
               value={courseId}
               onChange={(e) => setCourseId(e.target.value)}
               className="w-full h-11 px-3 bg-white rounded-2xl border border-pink-200 text-xs text-stone-700 min-h-[44px]"
+              aria-label="Selecionar disciplina"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -150,6 +205,8 @@ export const StudyNotes: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Controle Difuso de Constitucionalidade"
+              className="min-h-[44px]"
+              aria-label="Conceito ou Artigo Central"
             />
           </div>
 
@@ -163,6 +220,7 @@ export const StudyNotes: React.FC = () => {
               placeholder="Síntese da súmula, artigo ou tese..."
               rows={3}
               className="w-full p-3 bg-white rounded-2xl border border-pink-200 text-xs text-stone-700 focus:outline-none min-h-[80px]"
+              aria-label="Resumo ou Síntese Rápida"
             />
           </div>
 
@@ -183,11 +241,14 @@ export const StudyNotes: React.FC = () => {
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               placeholder="STF, Súmula Vinculante, Art. 102"
+              className="min-h-[44px]"
+              aria-label="Tags do fichamento"
             />
           </div>
 
-          <Button onClick={handleSave} className="w-full">
-            <Sparkles className="w-4 h-4 mr-1.5" /> Salvar Fichamento
+          <Button onClick={handleSave} className="w-full min-h-[44px]">
+            <Sparkles className="w-4 h-4 mr-1.5" />
+            {selectedNote ? 'Atualizar Fichamento' : 'Salvar Fichamento'}
           </Button>
         </div>
       </Modal>

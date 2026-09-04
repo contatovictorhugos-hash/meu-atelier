@@ -112,6 +112,27 @@ describe('Unit Tests: MealStore (Weekly Meals, Sunday Prep & Shopping List)', ()
     assert.equal(useMealStore.getState().sundayPrepTasks.find((t) => t.id === added.id), undefined);
   });
 
+  test('updates an existing Sunday prep task description', () => {
+    const store = useMealStore.getState();
+    store.updatePrepTask('prep-1', 'Assar abóbora e legumes por 25min');
+
+    const updated = useMealStore.getState().sundayPrepTasks.find((t) => t.id === 'prep-1');
+    assert.equal(updated?.task, 'Assar abóbora e legumes por 25min');
+    assert.equal(updated?.completed, false); // retains status
+  });
+
+  test('updates an existing shopping item name and category', () => {
+    const store = useMealStore.getState();
+    store.updateShoppingItem('item-1', {
+      item_name: 'Cenoura Orgânica Ralada',
+      category: 'Geladeira',
+    });
+
+    const updated = useMealStore.getState().shoppingItems.find((i) => i.id === 'item-1');
+    assert.equal(updated?.item_name, 'Cenoura Orgânica Ralada');
+    assert.equal(updated?.category, 'Geladeira');
+  });
+
   test('clears completed shopping items in batch', () => {
     const store = useMealStore.getState();
     assert.equal(store.shoppingItems.filter((i) => i.is_completed).length, 1);

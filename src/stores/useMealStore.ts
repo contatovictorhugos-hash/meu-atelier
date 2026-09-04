@@ -8,10 +8,12 @@ import {
   fetchUserPrepTasks,
   insertUserPrepTask,
   toggleUserPrepTask,
+  updateUserPrepTask,
   deleteUserPrepTask,
   fetchUserShoppingItems,
   insertUserShoppingItem,
   toggleUserShoppingItem,
+  updateUserShoppingItem,
   deleteUserShoppingItem,
   clearCompletedUserShoppingItems,
 } from '../lib/supabase/sync.ts';
@@ -33,9 +35,11 @@ interface MealState {
   deleteMeal: (id: string) => void;
   togglePrepTask: (id: string) => void;
   addPrepTask: (task: string) => void;
+  updatePrepTask: (id: string, task: string) => void;
   deletePrepTask: (id: string) => void;
   toggleShoppingItem: (id: string) => void;
   addShoppingItem: (name: string, category: GroceryCategory) => void;
+  updateShoppingItem: (id: string, updates: { item_name?: string; category?: GroceryCategory }) => void;
   deleteShoppingItem: (id: string) => void;
   clearCompletedShoppingItems: () => void;
 }
@@ -234,6 +238,15 @@ export const useMealStore = create<MealState>()(
         }).catch(() => {});
       },
 
+      updatePrepTask: (id, task) => {
+        set((state) => ({
+          sundayPrepTasks: state.sundayPrepTasks.map((t) =>
+            t.id === id ? { ...t, task } : t
+          ),
+        }));
+        updateUserPrepTask(id, task).catch(() => {});
+      },
+
       deletePrepTask: (id) => {
         set((state) => ({
           sundayPrepTasks: state.sundayPrepTasks.filter((t) => t.id !== id),
@@ -273,6 +286,15 @@ export const useMealStore = create<MealState>()(
             }));
           }
         }).catch(() => {});
+      },
+
+      updateShoppingItem: (id, updates) => {
+        set((state) => ({
+          shoppingItems: state.shoppingItems.map((item) =>
+            item.id === id ? { ...item, ...updates } : item
+          ),
+        }));
+        updateUserShoppingItem(id, updates).catch(() => {});
       },
 
       deleteShoppingItem: (id) => {

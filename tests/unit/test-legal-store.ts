@@ -46,6 +46,20 @@ describe('Unit Tests: LegalStore (Law Courses, Fichamentos & Deadlines)', () => 
     assert.match(newNote.id, /^n_/);
   });
 
+  test('updates an existing study note', () => {
+    const store = useLegalStore.getState();
+    store.updateStudyNote('n1', {
+      title: 'Controle Difuso e Reclamação Constitucional',
+      summary_text: 'Atualização pós-aula com novas súmulas.',
+      tags: ['STF', 'Reclamação'],
+    });
+
+    const updated = useLegalStore.getState().notes.find((n) => n.id === 'n1');
+    assert.equal(updated?.title, 'Controle Difuso e Reclamação Constitucional');
+    assert.equal(updated?.summary_text, 'Atualização pós-aula com novas súmulas.');
+    assert.deepEqual(updated?.tags, ['STF', 'Reclamação']);
+  });
+
   test('deletes a micro-fichamento by id', () => {
     const store = useLegalStore.getState();
     store.deleteStudyNote('n1');
@@ -73,6 +87,22 @@ describe('Unit Tests: LegalStore (Law Courses, Fichamentos & Deadlines)', () => 
 
     store.updateDeadlineStatus(newDeadlineId, 'Finalizado');
     assert.equal(useLegalStore.getState().deadlines.find((d) => d.id === newDeadlineId)?.status, 'Finalizado');
+  });
+
+  test('updates an existing study deadline fields', () => {
+    const store = useLegalStore.getState();
+    store.updateDeadline('d1', {
+      title: 'Peça Inicial - Mandado de Segurança',
+      due_date: '2026-09-30',
+      status: 'Em rascunho',
+      course_id: 'c2',
+    });
+
+    const updated = useLegalStore.getState().deadlines.find((d) => d.id === 'd1');
+    assert.equal(updated?.title, 'Peça Inicial - Mandado de Segurança');
+    assert.equal(updated?.due_date, '2026-09-30');
+    assert.equal(updated?.status, 'Em rascunho');
+    assert.equal(updated?.course_id, 'c2');
   });
 
   test('deletes a deadline by id', () => {

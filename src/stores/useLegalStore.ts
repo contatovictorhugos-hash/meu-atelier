@@ -13,10 +13,12 @@ import {
   deleteUserCourse,
   fetchUserNotes,
   insertUserNote,
+  updateUserNote,
   deleteUserNote,
   fetchUserDeadlines,
   insertUserDeadline,
   updateUserDeadlineStatus,
+  updateUserDeadline,
   deleteUserDeadline,
 } from '../lib/supabase/sync.ts';
 
@@ -34,8 +36,10 @@ interface LegalState {
   deleteCourse: (id: string) => void;
   updateCourseProgress: (courseId: string, progress: number) => void;
   addStudyNote: (note: Omit<StudyNote, 'id' | 'created_at'>) => void;
+  updateStudyNote: (id: string, updates: Partial<Omit<StudyNote, 'id' | 'created_at'>>) => void;
   deleteStudyNote: (id: string) => void;
   addDeadline: (deadline: Omit<StudyDeadline, 'id'>) => void;
+  updateDeadline: (id: string, updates: Partial<Omit<StudyDeadline, 'id'>>) => void;
   updateDeadlineStatus: (id: string, status: DeadlineStatus) => void;
   deleteDeadline: (id: string) => void;
 }
@@ -234,6 +238,15 @@ export const useLegalStore = create<LegalState>()(
         }).catch(() => {});
       },
 
+      updateStudyNote: (id, updates) => {
+        set((state) => ({
+          notes: state.notes.map((n) =>
+            n.id === id ? { ...n, ...updates } : n
+          ),
+        }));
+        updateUserNote(id, updates).catch(() => {});
+      },
+
       deleteStudyNote: (id) => {
         set((state) => ({
           notes: state.notes.filter((n) => n.id !== id),
@@ -259,6 +272,15 @@ export const useLegalStore = create<LegalState>()(
             }));
           }
         }).catch(() => {});
+      },
+
+      updateDeadline: (id, updates) => {
+        set((state) => ({
+          deadlines: state.deadlines.map((d) =>
+            d.id === id ? { ...d, ...updates } : d
+          ),
+        }));
+        updateUserDeadline(id, updates).catch(() => {});
       },
 
       updateDeadlineStatus: (id, status) => {
