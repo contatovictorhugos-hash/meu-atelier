@@ -6,40 +6,55 @@
   "gates": [
     {
       "id": "gate-1-po",
-      "name": "Homologação de Requisitos",
+      "name": "Homologação de Requisitos (Specify Toolkit)",
       "agent": "po_requirements_architect",
       "definitionFile": ".agents/team/po.agent.md",
+      "methodology": "Spec-Driven Development (Specify Toolkit)",
+      "mandatoryWorkflow": [
+        "speckit-specify",
+        "speckit-checklist",
+        "speckit-plan",
+        "speckit-tasks"
+      ],
       "requiredOutputs": [
         "specs/{feature}/spec.md",
-        "specs/{feature}/checklists/requirements.md"
-      ]
+        "specs/{feature}/checklists/requirements.md",
+        "specs/{feature}/plan.md",
+        "specs/{feature}/tasks.md"
+      ],
+      "handoffTo": "gate-2-dev"
     },
     {
       "id": "gate-2-dev",
-      "name": "Implementação Funcional",
+      "name": "Implementação Funcional (speckit-implement)",
       "agent": "dev_fullstack_engineer",
       "definitionFile": ".agents/team/dev.agent.md",
+      "trigger": "Invocado pelo PO ao finalizar tasks.md",
       "validationCommands": [
         "npm run typecheck",
         "npm run lint",
         "npm run build"
-      ]
+      ],
+      "handoffTo": "gate-3-qa"
     },
     {
       "id": "gate-3-qa",
-      "name": "Validação de Estabilidade",
+      "name": "Validação de Estabilidade & Regressão",
       "agent": "qa_test_specialist",
       "definitionFile": ".agents/team/qa.agent.md",
+      "trigger": "Invocado pelo DEV ao concluir o build",
       "validationCommands": [
         "npm run test"
       ],
-      "requiredPassRate": 1.0
+      "requiredPassRate": 1.0,
+      "handoffTo": "gate-4-si"
     },
     {
       "id": "gate-4-si",
       "name": "Liberação de Segurança & Compliance",
       "agent": "si_security_gatekeeper",
       "definitionFile": ".agents/team/si.agent.md",
+      "trigger": "Invocado pelo QA após 100% de testes verdes",
       "validationCommands": [
         "bash scripts/security-check.sh"
       ],
@@ -47,7 +62,8 @@
         "100_percent_rls",
         "zero_secrets_leaked",
         "storage_isolation"
-      ]
+      ],
+      "finalAction": "Autorização de Git Commit & Push"
     }
   ]
 }

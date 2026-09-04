@@ -264,3 +264,52 @@ Ao desenvolver ou customizar qualquer funcionalidade do portfólio:
 - [ ] As fontes de dados do `portfolio.config.ts` ou Supabase renderizam corretamente.
 - [ ] Links externos abrem corretamente sem quebrar a navegação principal.
 - [ ] O tempo de resposta ao toque é imediato (sem lag de re-renderização).
+
+---
+
+## 10. Orquestração da Squad Agentica & Fluxo Specify Obrigatório
+
+Toda e qualquer nova funcionalidade, alteração estrutural ou módulo adicionado ao Atelier DEVE seguir rigorosamente o fluxo integrado de **Spec-Driven Development (Specify / Spec-Kit)** orquestrado pela Squad de Agentes:
+
+```text
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ 1. FASE DE PRODUTO (PO + SPECIFY TOOLKIT)                              │
+ │    • /speckit-specify   ──▶ specs/<id>/spec.md (Jornadas P1-P4)        │
+ │    • /speckit-checklist ──▶ specs/<id>/checklists/requirements.md      │
+ │    • /speckit-plan      ──▶ specs/<id>/plan.md (Arquitetura)           │
+ │    • /speckit-tasks     ──▶ specs/<id>/tasks.md (Backlog ordenado)     │
+ └────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼ [Chama o DEV]
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ 2. FASE DE IMPLEMENTAÇÃO (AGENTE DEV)                                  │
+ │    • Executa speckit-implement com base no tasks.md                    │
+ │    • Next.js 15, TypeScript estrito (Zero `any`), Tailwind, Safe Areas │
+ │    • Supabase Storage WebP (Zero base64), Zustand persistência cloud   │
+ │    • Validação: npm run typecheck && npm run lint && npm run build     │
+ └────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼ [Chama o QA]
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ 3. FASE DE QUALIDADE & TESTES (AGENTE QA)                              │
+ │    • Adiciona novos testes unitários, integração, blackbox e whitebox   │
+ │    • Executa npm test (Exigência inegociável: 100% dos testes verdes)  │
+ │    • Valida ausência de regressões e tempos de resposta rápidos        │
+ └────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼ [Chama o SI]
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ 4. FASE DE SEGURANÇA & COMPLIANCE (AGENTE SI)                          │
+ │    • Audita 100% RLS nas tabelas PostgreSQL e policies de Storage      │
+ │    • Audita middleware.ts, headers e mitigação XSS                     │
+ │    • Executa obrigatoriamente bash scripts/security-check.sh           │
+ │    • Veredito: Security Pass (Code 0) autoriza o Commit e Push         │
+ └────────────────────────────────────────────────────────────────────────┘
+```
+
+### Regras Mandatórias da Esteira:
+1. **O PO é o ponto de entrada único:** Nenhuma linha de código deve ser escrita pelo DEV sem que o PO tenha executado os passos do `specify` e gerado o `spec.md`, checklist e `tasks.md`.
+2. **Implementação Exclusiva do DEV:** O PO transfere a execução para o Agente DEV na fase de implementação (`speckit-implement`). O DEV entrega o código compilando e tipado.
+3. **Auditoria Cética do QA:** Após o DEV, o QA é obrigatoriamente acionado para testar tudo e garantir que a cobertura de testes foi expandida sem quebras.
+4. **Veto de Segurança do SI:** Por fim, o SI roda a checagem de segredos e RLS. Somente com o aval do SI o commit e push são autorizados.
+
