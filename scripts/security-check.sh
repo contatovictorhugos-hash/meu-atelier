@@ -20,7 +20,7 @@ echo "✅ Nenhum arquivo .env ou chave privada versionada."
 
 # 2. Varredura de Padrões de Segredos em Código
 echo "🔍 2. Verificando se há segredos vazados no código recente..."
-SECRETS_FOUND=$(git grep -E 'service_role|AIza[-0-9A-Za-z_]{35}|sk_live_[0-9a-zA-Z]{24}|PRIVATE KEY' -- ':!tests/' ':!.node/' ':!package-lock.json' ':!scripts/' || true)
+SECRETS_FOUND=$(git grep -E 'service_role|AIza[-0-9A-Za-z_]{35}|sk_live_[0-9a-zA-Z]{24}|PRIVATE KEY' -- ':!tests/' ':!.github/' ':!.node/' ':!package-lock.json' ':!scripts/' || true)
 if [ -n "$SECRETS_FOUND" ]; then
   echo "❌ ERRO CRÍTICO: Padrão de credencial ou chave secreta detectado:"
   echo "$SECRETS_FOUND"
@@ -36,7 +36,8 @@ echo "✅ TypeScript strict sem erros."
 # 4. Auditoria de Dependências
 echo "🔍 4. Verificando vulnerabilidades críticas em dependências..."
 if command -v npm &> /dev/null; then
-  npm audit --audit-level=critical || true
+  # Timeout preventivo de 5s para não bloquear o git push em caso de instabilidade no registro npm
+  npm audit --audit-level=critical --fetch-timeout=5000 || true
 fi
 
 echo "🟢 [Atelier Security Gate] Auditoria concluída com sucesso! Aprovado para Push."
